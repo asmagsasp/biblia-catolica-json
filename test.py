@@ -16,9 +16,10 @@ soup = BeautifulSoup(html_doc, "html.parser")
 data = []
 
 for dataBox in soup.find_all("div", class_="row booksList"):
-    words = dataBox.text.strip(" ")
-    for current_word in words:
-        print(current_word)
+    print(dataBox.text.strip())
+    #words = dataBox.text.strip(" ")
+    #for current_word in words:
+    #    print(current_word)
 
     #dataBox.text.strip(" ")
 
