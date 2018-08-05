@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 from flask import Flask, jsonify, request
 from bs4 import BeautifulSoup
-from urllib.request import urlopen, Request
 import os   
+import urllib2
 
 app = Flask(__name__)
 
@@ -10,8 +12,10 @@ URL = "https://www.bibliacatolica.com.br/"
 @app.route('/api/biblia', methods=['GET'])
 def livros():
 
-    req = Request(URL,headers={'User-Agent': 'Mozilla/5.0'})
-    html_doc = urlopen(req).read()
+    req  = urllib2.Request(URL)
+    req.add_header('User-Agent','Mozilla/5.0')
+    resp = urllib2.urlopen(req)
+    html_doc = resp.read()
 
     soup = BeautifulSoup(html_doc, "html.parser")
     data = []
@@ -51,6 +55,62 @@ def livros():
                   data.append( { i : current_word } )    
 
     return jsonify({'livros': data})  
+
+@app.route('/api/biblia/genesis/<capitulo>', methods=['GET'])
+def genesis(capitulo):
+    URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/genesis/{}".format(capitulo)
+
+    req  = urllib2.Request(URL)
+    req.add_header('User-Agent','Mozilla/5.0')
+    resp = urllib2.urlopen(req)
+    html_doc = resp.read()
+
+    soup = BeautifulSoup(html_doc, "html.parser")
+    data = []
+
+    for dataBox in soup.find_all("p", class_="odd"):
+
+        s = dataBox.text
+        data.append( { "verso" : s } ) 
+
+    even = 1
+    for dataBox in soup.find_all("p", class_="even"):
+    
+        s = dataBox.text
+        data.insert(even, { "verso" : s })
+        even = even + 1
+
+
+     
+    return jsonify({'genesis': data})    
+
+@app.route('/api/biblia/exodo/<capitulo>', methods=['GET'])
+def exodo(capitulo):
+    URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/exodo/{}".format(capitulo)
+
+    req  = urllib2.Request(URL)
+    req.add_header('User-Agent','Mozilla/5.0')
+    resp = urllib2.urlopen(req)
+    html_doc = resp.read()
+
+    soup = BeautifulSoup(html_doc, "html.parser")
+    data = []
+
+    for dataBox in soup.find_all("p", class_="odd"):
+
+        s = dataBox.text
+        data.append( { "verso" : s } ) 
+
+    even = 1
+    for dataBox in soup.find_all("p", class_="even"):
+    
+        s = dataBox.text
+        data.insert(even, { "verso" : s })
+        even = even + 1
+
+
+     
+    return jsonify({'exodo': data})     
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
