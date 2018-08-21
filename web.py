@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from flask import Flask, jsonify, request
 from bs4 import BeautifulSoup
 import os   
-import urllib2
+import urllib.request as urllib2
 
 app = Flask(__name__)
 
@@ -71,16 +71,22 @@ def genesis(capitulo):
     for dataBox in soup.find_all("p", class_="odd"):
 
         s = dataBox.text
-        data.append( { "verso" : s } ) 
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
     
         s = dataBox.text
-        data.insert(even, { "verso" : s })
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
-
+    data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False)
      
     return jsonify({'genesis': data})    
 
@@ -99,13 +105,19 @@ def exodo(capitulo):
     for dataBox in soup.find_all("p", class_="odd"):
 
         s = dataBox.text
-        data.append( { "verso" : s } ) 
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
     
         s = dataBox.text
-        data.insert(even, { "verso" : s })
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
