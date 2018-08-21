@@ -119,10 +119,213 @@ def exodo(capitulo):
         v = int(verso.replace(".",""))
         data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
-
-
-     
+    
+    data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False)
     return jsonify({'exodo': data})     
+
+@app.route('/api/biblia/levitico/<capitulo>', methods=['GET'])
+def levitico(capitulo):
+    URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/levitico/{}".format(capitulo)
+
+    req  = urllib2.Request(URL)
+    req.add_header('User-Agent','Mozilla/5.0')
+    resp = urllib2.urlopen(req)
+    html_doc = resp.read()
+
+    soup = BeautifulSoup(html_doc, "html.parser")
+    data = []
+
+    for dataBox in soup.find_all("p", class_="odd"):
+
+        s = dataBox.text
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+
+    even = 1
+    for dataBox in soup.find_all("p", class_="even"):
+    
+        s = dataBox.text
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        even = even + 1
+
+
+    data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False) 
+    return jsonify({'levitico': data})  
+
+@app.route('/api/biblia/numeros/<capitulo>', methods=['GET'])
+def numeros(capitulo):
+    URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/numeros/{}".format(capitulo)
+
+    req  = urllib2.Request(URL)
+    req.add_header('User-Agent','Mozilla/5.0')
+    resp = urllib2.urlopen(req)
+    html_doc = resp.read()
+
+    soup = BeautifulSoup(html_doc, "html.parser")
+    data = []
+
+    for dataBox in soup.find_all("p", class_="odd"):
+
+        s = dataBox.text
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+
+    even = 1
+    for dataBox in soup.find_all("p", class_="even"):
+    
+        s = dataBox.text
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        even = even + 1
+
+
+    data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False) 
+    return jsonify({'numeros': data})  
+
+@app.route('/api/biblia/deuteronomio/<capitulo>', methods=['GET'])
+def deuteronomio(capitulo):
+    URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/deuteronomio/{}".format(capitulo)
+
+    req  = urllib2.Request(URL)
+    req.add_header('User-Agent','Mozilla/5.0')
+    resp = urllib2.urlopen(req)
+    html_doc = resp.read()
+
+    soup = BeautifulSoup(html_doc, "html.parser")
+    data = []
+
+    for dataBox in soup.find_all("p", class_="odd"):
+
+        s = dataBox.text
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+
+    even = 1
+    for dataBox in soup.find_all("p", class_="even"):
+    
+        s = dataBox.text
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        even = even + 1
+
+
+    data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False) 
+    return jsonify({'deuteronomio': data})  
+
+@app.route('/api/biblia/josue/<capitulo>', methods=['GET'])
+def josue(capitulo):
+    URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/josue/{}".format(capitulo)
+
+    req  = urllib2.Request(URL)
+    req.add_header('User-Agent','Mozilla/5.0')
+    resp = urllib2.urlopen(req)
+    html_doc = resp.read()
+
+    soup = BeautifulSoup(html_doc, "html.parser")
+    data = []
+
+    for dataBox in soup.find_all("p", class_="odd"):
+
+        s = dataBox.text
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+
+    even = 1
+    for dataBox in soup.find_all("p", class_="even"):
+    
+        s = dataBox.text
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        even = even + 1
+
+
+    data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False) 
+    return jsonify({'josue': data})  
+
+@app.route('/api/biblia/juizes/<capitulo>', methods=['GET'])
+def juizes(capitulo):
+    URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/juizes/{}".format(capitulo)
+
+    req  = urllib2.Request(URL)
+    req.add_header('User-Agent','Mozilla/5.0')
+    resp = urllib2.urlopen(req)
+    html_doc = resp.read()
+
+    soup = BeautifulSoup(html_doc, "html.parser")
+    data = []
+
+    for dataBox in soup.find_all("p", class_="odd"):
+
+        s = dataBox.text
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+
+    even = 1
+    for dataBox in soup.find_all("p", class_="even"):
+    
+        s = dataBox.text
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        even = even + 1
+
+
+    data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False) 
+    return jsonify({'juizes': data})   
+
+@app.route('/api/biblia/rute/<capitulo>', methods=['GET'])
+def rute(capitulo):
+    URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/rute/{}".format(capitulo)
+
+    req  = urllib2.Request(URL)
+    req.add_header('User-Agent','Mozilla/5.0')
+    resp = urllib2.urlopen(req)
+    html_doc = resp.read()
+
+    soup = BeautifulSoup(html_doc, "html.parser")
+    data = []
+
+    for dataBox in soup.find_all("p", class_="odd"):
+
+        s = dataBox.text
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+
+    even = 1
+    for dataBox in soup.find_all("p", class_="even"):
+    
+        s = dataBox.text
+        verso = s[:3]
+        s = s.replace(verso,"")
+        v = int(verso.replace(".",""))
+        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        even = even + 1
+
+
+    data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False) 
+    return jsonify({'rute': data})  
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
