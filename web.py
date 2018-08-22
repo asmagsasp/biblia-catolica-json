@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 from flask import Flask, jsonify, request
 from bs4 import BeautifulSoup
 import os   
-#import urllib.request as urllib2
-import urllib2
+import urllib.request as urllib2
 
 app = Flask(__name__)
 
