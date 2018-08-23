@@ -7,6 +7,7 @@ app = Flask(__name__)
 
 URL = "https://www.bibliacatolica.com.br/"
     
+# Retorna todos os livros da bíblia
 @app.route('/api/biblia', methods=['GET'])
 def livros():
 
@@ -54,41 +55,8 @@ def livros():
 
     return jsonify({'livros': data})  
 
-@app.route('/api/biblia/genesis', methods=['GET'])
-def genesis_capitulos():
-    req  = urllib2.Request(URL)
-    req.add_header('User-Agent','Mozilla/5.0')
-    resp = urllib2.urlopen(req)
-    html_doc = resp.read()
-
-    soup = BeautifulSoup(html_doc, "html.parser")
-    data = []
-
-    for dataBox in soup.find_all("div", class_="rightsidebar"):
-        for ulBox in dataBox.find_all("ul", class_="listChapter"):
-
-            s = ulBox.text
-
-            #verso = s[:3]
-            #s = s.replace(verso,"")
-            #v = int(verso.replace(".",""))
-            #data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
-
-    even = 1
-    for dataBox in soup.find_all("p", class_="even"):
-    
-        s = dataBox.text
-        verso = s[:3]
-        s = s.replace(verso,"")
-        v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
-        even = even + 1
-
-    data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False)
-     
-    return jsonify({'genesis': data})      
-
-@app.route('/api/biblia/genesis/<capitulo>', methods=['GET'])
+# Livro de Genesis
+@app.route('/api/biblia/1/<capitulo>', methods=['GET'])
 def genesis(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/genesis/{}".format(capitulo)
 
@@ -106,7 +74,7 @@ def genesis(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 1" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -115,14 +83,25 @@ def genesis(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 1" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
     data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False)
      
+    return jsonify({'genesis': data})  
+
+# Lista de Capitulos do Livro de Genesis
+@app.route('/api/biblia/1/capitulos', methods=['GET'])
+def genesis_capitulos():
+    data = []
+    for x in range(1, 51):
+
+        data.append( { "id" : x } ) 
+     
     return jsonify({'genesis': data})    
 
-@app.route('/api/biblia/exodo/<capitulo>', methods=['GET'])
+# Livro de Êxodo
+@app.route('/api/biblia/2/<capitulo>', methods=['GET'])
 def exodo(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/exodo/{}".format(capitulo)
 
@@ -140,7 +119,7 @@ def exodo(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 2" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -149,13 +128,14 @@ def exodo(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 2" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
     
     data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False)
     return jsonify({'exodo': data})     
 
-@app.route('/api/biblia/levitico/<capitulo>', methods=['GET'])
+# Livro de Levítico
+@app.route('/api/biblia/3/<capitulo>', methods=['GET'])
 def levitico(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/levitico/{}".format(capitulo)
 
@@ -173,7 +153,7 @@ def levitico(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 3" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -182,14 +162,15 @@ def levitico(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 3" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
     data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False) 
     return jsonify({'levitico': data})  
 
-@app.route('/api/biblia/numeros/<capitulo>', methods=['GET'])
+# Livro de Números
+@app.route('/api/biblia/4/<capitulo>', methods=['GET'])
 def numeros(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/numeros/{}".format(capitulo)
 
@@ -207,7 +188,7 @@ def numeros(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 4" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -216,14 +197,15 @@ def numeros(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 4" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
     data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False) 
     return jsonify({'numeros': data})  
 
-@app.route('/api/biblia/deuteronomio/<capitulo>', methods=['GET'])
+#Livro de Deuteronômio
+@app.route('/api/biblia/5/<capitulo>', methods=['GET'])
 def deuteronomio(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/deuteronomio/{}".format(capitulo)
 
@@ -241,7 +223,7 @@ def deuteronomio(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 5" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -250,14 +232,15 @@ def deuteronomio(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 5" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
     data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False) 
     return jsonify({'deuteronomio': data})  
 
-@app.route('/api/biblia/josue/<capitulo>', methods=['GET'])
+#Livro de Josué
+@app.route('/api/biblia/6/<capitulo>', methods=['GET'])
 def josue(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/josue/{}".format(capitulo)
 
@@ -275,7 +258,7 @@ def josue(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 6" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -284,14 +267,15 @@ def josue(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 6" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
     data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False) 
     return jsonify({'josue': data})  
 
-@app.route('/api/biblia/juizes/<capitulo>', methods=['GET'])
+#Livro de Juizes
+@app.route('/api/biblia/7/<capitulo>', methods=['GET'])
 def juizes(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/juizes/{}".format(capitulo)
 
@@ -309,7 +293,7 @@ def juizes(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 7" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -318,14 +302,15 @@ def juizes(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 7" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
     data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False) 
     return jsonify({'juizes': data})   
 
-@app.route('/api/biblia/rute/<capitulo>', methods=['GET'])
+#Livro de Rute
+@app.route('/api/biblia/8/<capitulo>', methods=['GET'])
 def rute(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/rute/{}".format(capitulo)
 
@@ -343,7 +328,7 @@ def rute(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 8" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -352,14 +337,15 @@ def rute(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 8" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
     data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False) 
     return jsonify({'rute': data})  
 
-@app.route('/api/biblia/isamuel/<capitulo>', methods=['GET'])
+#Livro de I Samuel
+@app.route('/api/biblia/9/<capitulo>', methods=['GET'])
 def isamuel(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/isamuel/{}".format(capitulo)
 
@@ -377,7 +363,7 @@ def isamuel(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 9" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -386,14 +372,15 @@ def isamuel(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 9" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
     data = sorted(data, key=lambda k: k['verso'].get('versiculo', 0), reverse=False) 
     return jsonify({'I Samuel': data})  
 
-@app.route('/api/biblia/iisamuel/<capitulo>', methods=['GET'])
+#Livro de II Samuel
+@app.route('/api/biblia/10/<capitulo>', methods=['GET'])
 def iisamuel(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/iisamuel/{}".format(capitulo)
 
@@ -411,7 +398,7 @@ def iisamuel(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 10" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -420,7 +407,7 @@ def iisamuel(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "verso" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 10" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
@@ -1519,4 +1506,4 @@ if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(os.environ.get('PORT', 5000))
     # Tem que ser 0.0.0.0 para rodar no Heroku
-    app.run(host='0.0.0.0', port=port)    
+    app.run(host='127.0.0.1', port=port)    
