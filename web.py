@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 from flask import Flask, jsonify, request
 from bs4 import BeautifulSoup
 import os   
-import urllib.request as urllib2
+import urllib2
 
 app = Flask(__name__)
 
@@ -45,12 +47,12 @@ def livros():
                        prior_word = current_frase
                     else:       
                        i = i + 1
-                       data.append( { i : current_frase  } )
+                       data.append( { "id" : i, "nome" : current_frase  } )
                        prior_word = ""
 
                else:   
                   i = i + 1
-                  data.append( { i : current_word } )    
+                  data.append( { "id" : i,  "nome" : current_word } )    
 
     return jsonify({'livros': data})  
 
