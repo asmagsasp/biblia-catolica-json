@@ -74,7 +74,7 @@ def genesis(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 1" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 1" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -83,10 +83,10 @@ def genesis(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 1" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 1" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
-    data = sorted(data, key=lambda k: k['Livro 1'].get('versiculo', 0), reverse=False)
+    data = sorted(data, key=lambda k: k['Capítulo 1'].get('versiculo', 0), reverse=False)
      
     return jsonify({'genesis': data})  
 
@@ -119,7 +119,7 @@ def exodo(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 2" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 2" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -128,10 +128,10 @@ def exodo(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 2" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 2" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
     
-    data = sorted(data, key=lambda k: k['Livro 2'].get('versiculo', 0), reverse=False)
+    data = sorted(data, key=lambda k: k['Capítulo 2'].get('versiculo', 0), reverse=False)
     return jsonify({'êxodo': data})     
 
 # Lista de Capitulos do Livro de Exodo
@@ -163,7 +163,7 @@ def levitico(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 3" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 3" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -172,11 +172,11 @@ def levitico(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 3" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 3" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
-    data = sorted(data, key=lambda k: k['Caitulo 3'].get('versiculo', 0), reverse=False) 
+    data = sorted(data, key=lambda k: k['Capítulo 3'].get('versiculo', 0), reverse=False) 
     return jsonify({'levítico': data}) 
 
 # Lista de Capitulos do Livro de Levítico
@@ -208,7 +208,7 @@ def numeros(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 4" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 4" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -217,11 +217,11 @@ def numeros(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 4" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 4" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
-    data = sorted(data, key=lambda k: k['Livro 4'].get('versiculo', 0), reverse=False) 
+    data = sorted(data, key=lambda k: k['Capítulo 4'].get('versiculo', 0), reverse=False) 
     return jsonify({'números': data}) 
 
 # Lista de Capitulos do Livro de Números
@@ -253,7 +253,7 @@ def deuteronomio(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 5" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 5" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -262,11 +262,11 @@ def deuteronomio(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 5" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 5" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
-    data = sorted(data, key=lambda k: k['Livro 5'].get('versiculo', 0), reverse=False) 
+    data = sorted(data, key=lambda k: k['Capítulo 5'].get('versiculo', 0), reverse=False) 
     return jsonify({'deuteronômio': data})  
 
 # Lista de Capitulos do Livro de Deuteronômio
@@ -298,7 +298,7 @@ def josue(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 6" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 6" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -307,12 +307,12 @@ def josue(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 6" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 6" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
-    data = sorted(data, key=lambda k: k['Livro 6'].get('versiculo', 0), reverse=False) 
-    return jsonify({'josue': data})  
+    data = sorted(data, key=lambda k: k['Capítulo 6'].get('versiculo', 0), reverse=False) 
+    return jsonify({'josué': data})  
 
 # Lista de Capitulos do Livro de Josué
 @app.route('/api/biblia/6/capitulos', methods=['GET'])
@@ -343,7 +343,7 @@ def juizes(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 7" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 7" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -352,11 +352,11 @@ def juizes(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 7" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 7" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
-    data = sorted(data, key=lambda k: k['Livro 7'].get('versiculo', 0), reverse=False) 
+    data = sorted(data, key=lambda k: k['Capítulo 7'].get('versiculo', 0), reverse=False) 
     return jsonify({'juizes': data})  
 
 # Lista de Capitulos do Livro de Juízes
@@ -388,7 +388,7 @@ def rute(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 8" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 8" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -397,11 +397,11 @@ def rute(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 8" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 8" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
-    data = sorted(data, key=lambda k: k['Livro 8'].get('versiculo', 0), reverse=False) 
+    data = sorted(data, key=lambda k: k['Capítulo 8'].get('versiculo', 0), reverse=False) 
     return jsonify({'rute': data})  
 
 # Lista de Capitulos do Livro de Rute
@@ -433,7 +433,7 @@ def isamuel(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 9" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 9" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -442,11 +442,11 @@ def isamuel(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 9" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 9" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
-    data = sorted(data, key=lambda k: k['Livro 9'].get('versiculo', 0), reverse=False) 
+    data = sorted(data, key=lambda k: k['Capítulo 9'].get('versiculo', 0), reverse=False) 
     return jsonify({'I Samuel': data})  
 
 # Lista de Capitulos do Livro de I Samuel
@@ -478,7 +478,7 @@ def iisamuel(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 10" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 10" : { "versiculo" : v, "texto" : s } } ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -487,11 +487,11 @@ def iisamuel(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Livro 10" : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "Capítulo 10" : { "versiculo" : v, "texto" : s } } ) 
         even = even + 1
 
 
-    data = sorted(data, key=lambda k: k['Livro 10'].get('versiculo', 0), reverse=False) 
+    data = sorted(data, key=lambda k: k['Capítulo 10'].get('versiculo', 0), reverse=False) 
     return jsonify({'II Samuel': data}) 
 
 # Lista de Capitulos do Livro de II Samuel
