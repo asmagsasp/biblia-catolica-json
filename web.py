@@ -98,7 +98,7 @@ def genesis_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'genesis': data})    
+    return jsonify({ "1" : {'Gênesis': data} } )    
 
 # 2.Livro de Êxodo
 @app.route('/api/biblia/2/<capitulo>', methods=['GET'])
@@ -142,7 +142,7 @@ def exodo_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'êxodo': data})      
+    return jsonify({ "2" : {'Êxodo': data} } )
 
 # 3.Livro de Levítico
 @app.route('/api/biblia/3/<capitulo>', methods=['GET'])
@@ -187,7 +187,7 @@ def levitico_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'levítico': data})   
+    return jsonify({ "3" : {'Levítico': data} } )
 
 # 4.Livro de Números
 @app.route('/api/biblia/4/<capitulo>', methods=['GET'])
@@ -232,7 +232,8 @@ def numeros_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'números': data})   
+    
+    return jsonify({ "4" : {'Números': data} } )
 
 # 5.Livro de Deuteronômio
 @app.route('/api/biblia/5/<capitulo>', methods=['GET'])
@@ -277,7 +278,7 @@ def deuteronomio_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'deuteronômio': data})       
+    return jsonify({ "5" : {'Deuteronômio': data} } )
 
 # 6.Livro de Josué
 @app.route('/api/biblia/6/<capitulo>', methods=['GET'])
@@ -322,7 +323,7 @@ def josue_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'josué': data})       
+    return jsonify({ "6" : {'Josué': data} } )
 
 # 7.Livro de Juizes
 @app.route('/api/biblia/7/<capitulo>', methods=['GET'])
@@ -367,7 +368,7 @@ def juizes_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'juízes': data})   
+    return jsonify({ "7" : {'Juízes': data} } )
 
 # 8.Livro de Rute
 @app.route('/api/biblia/8/<capitulo>', methods=['GET'])
@@ -412,7 +413,7 @@ def rute_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'rute': data})       
+    return jsonify({ "8" : {'Rute': data} } )
 
 # 9.Livro de I Samuel
 @app.route('/api/biblia/9/<capitulo>', methods=['GET'])
@@ -457,7 +458,7 @@ def isamuel_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'i samuel': data})       
+    return jsonify({ "9" : {'I Samuel': data} } )
 
 # 10.Livro de II Samuel
 @app.route('/api/biblia/10/<capitulo>', methods=['GET'])
@@ -502,7 +503,7 @@ def iisamuel_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'ii samuel': data})  
+    return jsonify({ "10" : {'II Samuel': data} } )
 
 ################## ATÉ AQUI ESTÁ FINALIZADO ####################
 
@@ -549,7 +550,7 @@ def ireis_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'i reis': data})  
+    return jsonify({ "11" : {'I Reis': data} } )
 
 # 12.Livro de II Reis
 @app.route('/api/biblia/12/<capitulo>', methods=['GET'])
@@ -594,7 +595,7 @@ def iireis_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'ii reis': data})  
+    return jsonify({ "12" : {'II Reis': data} } )
 
 #13.Livro de I Crônicas
 @app.route('/api/biblia/13/<capitulo>', methods=['GET'])
@@ -639,7 +640,7 @@ def icronicas_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'i crônicas': data})      
+    return jsonify({ "13" : {'I Crônicas': data} } )
 
 #Livro de I4 Cronicas
 @app.route('/api/biblia/14/<capitulo>', methods=['GET'])
@@ -684,7 +685,7 @@ def iicronicas_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'ii crônicas': data}) 
+    return jsonify({ "14" : {'II Crônicas': data} } )
 
 #15.Livro de Esdras
 @app.route('/api/biblia/15/<capitulo>', methods=['GET'])
@@ -729,7 +730,7 @@ def esdras_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'esdras': data})     
+    return jsonify({ "50" : {'Esdras': data} } )
 
 # 16.Livro de Neemias
 @app.route('/api/biblia/16/<capitulo>', methods=['GET'])
@@ -774,7 +775,7 @@ def neemias_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'neemias': data})  
+    return jsonify({ "16" : {'Neemias': data} } )
 
 # 17.Livro de Tobias
 @app.route('/api/biblia/17/<capitulo>', methods=['GET'])
@@ -819,7 +820,7 @@ def tobias_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'tobias': data}) 
+    return jsonify({ "17" : {'Tobias': data} } )
 
 #18. Livro de Judite
 @app.route('/api/biblia/18/<capitulo>', methods=['GET'])
@@ -864,7 +865,7 @@ def judite_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'judite': data})     
+    return jsonify({ "18" : {'Judite': data} } )
 
 #19. Livro de Ester
 @app.route('/api/biblia/19/<capitulo>', methods=['GET'])
@@ -909,7 +910,7 @@ def ester_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'ester': data}) 
+    return jsonify({ "19" : {'Ester': data} } )
 
 #20. Livro de Jo
 @app.route('/api/biblia/20/<capitulo>', methods=['GET'])
@@ -954,7 +955,7 @@ def jo_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'jó': data})     
+    return jsonify({ "20" : {'Jó': data} } )
 
 # 21.Livro de Salmos
 @app.route('/api/biblia/21/<capitulo>', methods=['GET'])
@@ -999,7 +1000,7 @@ def salmos_capitulos():
 
         data.append( { "id" : x } ) 
      
-    return jsonify({'salmos': data}) 
+    return jsonify({ "21" : {'Salmos': data} } )
 
 ####################### FINALIZADO ATÉ AQUI ###################    
 
