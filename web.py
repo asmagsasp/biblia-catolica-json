@@ -8,7 +8,7 @@ app = Flask(__name__)
 URL = "https://www.bibliacatolica.com.br/"
     
 # Retorna todos os livros da bíblia
-@app.route('/api/biblia', methods=['GET'])
+@app.route('/api/biblia/livros', methods=['GET'])
 def livros():
 
     req  = urllib2.Request(URL)
@@ -55,8 +55,18 @@ def livros():
 
     return jsonify({'livros': data})  
 
+# 1.Lista de Capitulos do Livro de Genesis
+@app.route('/api/biblia/capitulos/1', methods=['GET'])
+def genesis_capitulos():
+    data = []
+    for x in range(1, 51):
+
+        data.append( { "id" : x } ) 
+     
+    return jsonify({ "1" : {'Gênesis': data} } )    
+
 # 1.Livro de Genesis
-@app.route('/api/biblia/1/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/1/versiculos/<capitulo>', methods=['GET'])
 def genesis(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/genesis/{}".format(capitulo)
 
@@ -90,18 +100,18 @@ def genesis(capitulo):
      
     return jsonify({'genesis': data})  
 
-# 1.Lista de Capitulos do Livro de Genesis
-@app.route('/api/biblia/1/capitulos', methods=['GET'])
-def genesis_capitulos():
+# 2.Lista de Capitulos do Livro de Exodo
+@app.route('/api/biblia/capitulos/2', methods=['GET'])
+def exodo_capitulos():
     data = []
-    for x in range(1, 51):
+    for x in range(1, 41):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "1" : {'Gênesis': data} } )    
+    return jsonify({ "2" : {'Êxodo': data} } )
 
 # 2.Livro de Êxodo
-@app.route('/api/biblia/2/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/2/versiculos/<capitulo>', methods=['GET'])
 def exodo(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/exodo/{}".format(capitulo)
 
@@ -134,18 +144,18 @@ def exodo(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
     return jsonify({'êxodo': data})     
 
-# 2.Lista de Capitulos do Livro de Exodo
-@app.route('/api/biblia/2/capitulos', methods=['GET'])
-def exodo_capitulos():
+# 3.Lista de Capitulos do Livro de Levítico
+@app.route('/api/biblia/capitulos/3', methods=['GET'])
+def levitico_capitulos():
     data = []
-    for x in range(1, 41):
+    for x in range(1, 28):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "2" : {'Êxodo': data} } )
+    return jsonify({ "3" : {'Levítico': data} } )
 
 # 3.Livro de Levítico
-@app.route('/api/biblia/3/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/3/versiculos/<capitulo>', methods=['GET'])
 def levitico(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/levitico/{}".format(capitulo)
 
@@ -179,18 +189,19 @@ def levitico(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
     return jsonify({'levítico': data}) 
 
-# 3.Lista de Capitulos do Livro de Levítico
-@app.route('/api/biblia/3/capitulos', methods=['GET'])
-def levitico_capitulos():
+# 4.Lista de Capitulos do Livro de Números
+@app.route('/api/biblia/capitulos/4', methods=['GET'])
+def numeros_capitulos():
     data = []
-    for x in range(1, 28):
+    for x in range(1, 37):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "3" : {'Levítico': data} } )
+    
+    return jsonify({ "4" : {'Números': data} } )
 
 # 4.Livro de Números
-@app.route('/api/biblia/4/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/4/versiculos/<capitulo>', methods=['GET'])
 def numeros(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/numeros/{}".format(capitulo)
 
@@ -224,19 +235,18 @@ def numeros(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
     return jsonify({'números': data}) 
 
-# 4.Lista de Capitulos do Livro de Números
-@app.route('/api/biblia/4/capitulos', methods=['GET'])
-def numeros_capitulos():
+# 5.Lista de Capitulos do Livro de Deuteronômio
+@app.route('/api/biblia/capitulos/5', methods=['GET'])
+def deuteronomio_capitulos():
     data = []
-    for x in range(1, 37):
+    for x in range(1, 35):
 
         data.append( { "id" : x } ) 
      
-    
-    return jsonify({ "4" : {'Números': data} } )
+    return jsonify({ "5" : {'Deuteronômio': data} } )
 
 # 5.Livro de Deuteronômio
-@app.route('/api/biblia/5/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/5/versiculos/<capitulo>', methods=['GET'])
 def deuteronomio(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/deuteronomio/{}".format(capitulo)
 
@@ -270,18 +280,18 @@ def deuteronomio(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
     return jsonify({'deuteronômio': data})  
 
-# 5.Lista de Capitulos do Livro de Deuteronômio
-@app.route('/api/biblia/5/capitulos', methods=['GET'])
-def deuteronomio_capitulos():
+# 6.Lista de Capitulos do Livro de Josué
+@app.route('/api/biblia/capitulos/6', methods=['GET'])
+def josue_capitulos():
     data = []
-    for x in range(1, 35):
+    for x in range(1, 25):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "5" : {'Deuteronômio': data} } )
+    return jsonify({ "6" : {'Josué': data} } )
 
 # 6.Livro de Josué
-@app.route('/api/biblia/6/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/6/versiculos/<capitulo>', methods=['GET'])
 def josue(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/josue/{}".format(capitulo)
 
@@ -315,18 +325,18 @@ def josue(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
     return jsonify({'josué': data})  
 
-# 6.Lista de Capitulos do Livro de Josué
-@app.route('/api/biblia/6/capitulos', methods=['GET'])
-def josue_capitulos():
+# 7.Lista de Capitulos do Livro de Juízes
+@app.route('/api/biblia/capitulos/7', methods=['GET'])
+def juizes_capitulos():
     data = []
-    for x in range(1, 25):
+    for x in range(1, 22):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "6" : {'Josué': data} } )
+    return jsonify({ "7" : {'Juízes': data} } )
 
 # 7.Livro de Juizes
-@app.route('/api/biblia/7/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/7/versiculos/<capitulo>', methods=['GET'])
 def juizes(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/juizes/{}".format(capitulo)
 
@@ -360,18 +370,18 @@ def juizes(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
     return jsonify({'juizes': data})  
 
-# 7.Lista de Capitulos do Livro de Juízes
-@app.route('/api/biblia/7/capitulos', methods=['GET'])
-def juizes_capitulos():
+# 8.Lista de Capitulos do Livro de Rute
+@app.route('/api/biblia/capitulos/8', methods=['GET'])
+def rute_capitulos():
     data = []
-    for x in range(1, 22):
+    for x in range(1, 5):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "7" : {'Juízes': data} } )
+    return jsonify({ "8" : {'Rute': data} } )
 
 # 8.Livro de Rute
-@app.route('/api/biblia/8/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/8/versiculos/<capitulo>', methods=['GET'])
 def rute(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/rute/{}".format(capitulo)
 
@@ -405,18 +415,18 @@ def rute(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
     return jsonify({'rute': data})  
 
-# 8.Lista de Capitulos do Livro de Rute
-@app.route('/api/biblia/8/capitulos', methods=['GET'])
-def rute_capitulos():
+# 9.Lista de Capitulos do Livro de I Samuel
+@app.route('/api/biblia/capitulos/9', methods=['GET'])
+def isamuel_capitulos():
     data = []
-    for x in range(1, 5):
+    for x in range(1, 32):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "8" : {'Rute': data} } )
+    return jsonify({ "9" : {'I Samuel': data} } )
 
 # 9.Livro de I Samuel
-@app.route('/api/biblia/9/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/9/versiculos/<capitulo>', methods=['GET'])
 def isamuel(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/isamuel/{}".format(capitulo)
 
@@ -450,18 +460,18 @@ def isamuel(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
     return jsonify({'I Samuel': data})  
 
-# 9.Lista de Capitulos do Livro de I Samuel
-@app.route('/api/biblia/9/capitulos', methods=['GET'])
-def isamuel_capitulos():
+# 10.Lista de Capitulos do Livro de II Samuel
+@app.route('/api/biblia/capitulos/10', methods=['GET'])
+def iisamuel_capitulos():
     data = []
-    for x in range(1, 32):
+    for x in range(1, 25):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "9" : {'I Samuel': data} } )
+    return jsonify({ "10" : {'II Samuel': data} } )
 
 # 10.Livro de II Samuel
-@app.route('/api/biblia/10/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/10/versiculos/<capitulo>', methods=['GET'])
 def iisamuel(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/iisamuel/{}".format(capitulo)
 
@@ -495,20 +505,21 @@ def iisamuel(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
     return jsonify({'II Samuel': data}) 
 
-# 10.Lista de Capitulos do Livro de II Samuel
-@app.route('/api/biblia/10/capitulos', methods=['GET'])
-def iisamuel_capitulos():
-    data = []
-    for x in range(1, 25):
-
-        data.append( { "id" : x } ) 
-     
-    return jsonify({ "10" : {'II Samuel': data} } )
 
 ################## ATÉ AQUI ESTÁ FINALIZADO ####################
 
+# 11.Lista de Capitulos do Livro de I Reis
+@app.route('/api/biblia/capitulos/11', methods=['GET'])
+def ireis_capitulos():
+    data = []
+    for x in range(1, 27):
+
+        data.append( { "id" : x } ) 
+     
+    return jsonify({ "11" : {'I Reis': data} } )
+
 # 11.Livro de I Reis
-@app.route('/api/biblia/11/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/11/versiculos/<capitulo>', methods=['GET'])
 def ireis(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/ireis/{}".format(capitulo)
 
@@ -542,18 +553,18 @@ def ireis(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
     return jsonify({'I Reis': data}) 
 
-# 11.Lista de Capitulos do Livro de I Reis
-@app.route('/api/biblia/11/capitulos', methods=['GET'])
-def ireis_capitulos():
+# 12.Lista de Capitulos do Livro de II Reis
+@app.route('/api/biblia/capitulos/12', methods=['GET'])
+def iireis_capitulos():
     data = []
-    for x in range(1, 27):
+    for x in range(1, 26):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "11" : {'I Reis': data} } )
+    return jsonify({ "12" : {'II Reis': data} } )
 
 # 12.Livro de II Reis
-@app.route('/api/biblia/12/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/12/versiculos/<capitulo>', methods=['GET'])
 def iireis(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/iireis/{}".format(capitulo)
 
@@ -587,18 +598,18 @@ def iireis(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
     return jsonify({'II Reis': data}) 
 
-# 12.Lista de Capitulos do Livro de II Reis
-@app.route('/api/biblia/12/capitulos', methods=['GET'])
-def iireis_capitulos():
+# 13.Lista de Capitulos do Livro de I Cronicas
+@app.route('/api/biblia/capitulos/13', methods=['GET'])
+def icronicas_capitulos():
     data = []
-    for x in range(1, 26):
+    for x in range(1, 30):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "12" : {'II Reis': data} } )
+    return jsonify({ "13" : {'I Crônicas': data} } )
 
 #13.Livro de I Crônicas
-@app.route('/api/biblia/13/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/13/versiculos/<capitulo>', methods=['GET'])
 def icronicas(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/icronicas/{}".format(capitulo)
 
@@ -632,18 +643,18 @@ def icronicas(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
     return jsonify({'I Crônicas': data}) 
 
-# 13.Lista de Capitulos do Livro de I Cronicas
-@app.route('/api/biblia/13/capitulos', methods=['GET'])
-def icronicas_capitulos():
+# 14.Lista de Capitulos do Livro de II Cronicas
+@app.route('/api/biblia/capitulos/14', methods=['GET'])
+def iicronicas_capitulos():
     data = []
-    for x in range(1, 30):
+    for x in range(1, 37):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "13" : {'I Crônicas': data} } )
+    return jsonify({ "14" : {'II Crônicas': data} } )
 
 #Livro de I4 Cronicas
-@app.route('/api/biblia/14/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/14/versiculos/<capitulo>', methods=['GET'])
 def iicronicas(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/iicronicas/{}".format(capitulo)
 
@@ -677,18 +688,18 @@ def iicronicas(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
     return jsonify({'II Crônicas': data}) 
 
-# 14.Lista de Capitulos do Livro de II Cronicas
-@app.route('/api/biblia/14/capitulos', methods=['GET'])
-def iicronicas_capitulos():
+# 15.Lista de Capitulos do Livro de Esdras
+@app.route('/api/biblia/capitulos/15', methods=['GET'])
+def esdras_capitulos():
     data = []
-    for x in range(1, 37):
+    for x in range(1, 11):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "14" : {'II Crônicas': data} } )
+    return jsonify({ "50" : {'Esdras': data} } )
 
 #15.Livro de Esdras
-@app.route('/api/biblia/15/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/15/versiculos/<capitulo>', methods=['GET'])
 def esdras(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/esdras/{}".format(capitulo)
 
@@ -722,18 +733,18 @@ def esdras(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
     return jsonify({'Esdras': data}) 
 
-# 15.Lista de Capitulos do Livro de Esdras
-@app.route('/api/biblia/15/capitulos', methods=['GET'])
-def esdras_capitulos():
+# 16.Lista de Capitulos do Livro de I Neemias
+@app.route('/api/biblia/capitulos/16', methods=['GET'])
+def neemias_capitulos():
     data = []
-    for x in range(1, 11):
+    for x in range(1, 14):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "50" : {'Esdras': data} } )
+    return jsonify({ "16" : {'Neemias': data} } )
 
 # 16.Livro de Neemias
-@app.route('/api/biblia/16/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/16/versiculos/<capitulo>', methods=['GET'])
 def neemias(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/neemias/{}".format(capitulo)
 
@@ -767,18 +778,18 @@ def neemias(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
     return jsonify({'Neemias': data})
 
-# 16.Lista de Capitulos do Livro de I Neemias
-@app.route('/api/biblia/16/capitulos', methods=['GET'])
-def neemias_capitulos():
+# 17.Lista de Capitulos do Livro de Tobias
+@app.route('/api/biblia/capitulos/17', methods=['GET'])
+def tobias_capitulos():
     data = []
-    for x in range(1, 14):
+    for x in range(1, 15):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "16" : {'Neemias': data} } )
+    return jsonify({ "17" : {'Tobias': data} } )
 
 # 17.Livro de Tobias
-@app.route('/api/biblia/17/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/17/versiculos/<capitulo>', methods=['GET'])
 def tobias(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/tobias/{}".format(capitulo)
 
@@ -812,18 +823,18 @@ def tobias(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
     return jsonify({'Tobias': data}) 
 
-# 17.Lista de Capitulos do Livro de Tobias
-@app.route('/api/biblia/17/capitulos', methods=['GET'])
-def tobias_capitulos():
+# 18.Lista de Capitulos do Livro de Judite
+@app.route('/api/biblia/capitulos/18', methods=['GET'])
+def judite_capitulos():
     data = []
-    for x in range(1, 15):
+    for x in range(1, 17):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "17" : {'Tobias': data} } )
+    return jsonify({ "18" : {'Judite': data} } )
 
 #18. Livro de Judite
-@app.route('/api/biblia/18/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/18/versiculos/<capitulo>', methods=['GET'])
 def judite(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/judite/{}".format(capitulo)
 
@@ -857,18 +868,18 @@ def judite(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
     return jsonify({'Judite': data})
 
-# 18.Lista de Capitulos do Livro de Judite
-@app.route('/api/biblia/18/capitulos', methods=['GET'])
-def judite_capitulos():
+# 19.Lista de Capitulos do Livro de Ester
+@app.route('/api/biblia/capitulos/19', methods=['GET'])
+def ester_capitulos():
     data = []
     for x in range(1, 17):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "18" : {'Judite': data} } )
+    return jsonify({ "19" : {'Ester': data} } )
 
 #19. Livro de Ester
-@app.route('/api/biblia/19/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/19/versiculos/<capitulo>', methods=['GET'])
 def ester(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/ester/{}".format(capitulo)
 
@@ -902,18 +913,18 @@ def ester(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
     return jsonify({'Ester': data})
 
-# 19.Lista de Capitulos do Livro de Ester
-@app.route('/api/biblia/19/capitulos', methods=['GET'])
-def ester_capitulos():
+# 20.Lista de Capitulos do Livro de Jó
+@app.route('/api/biblia/capitulos/20', methods=['GET'])
+def jo_capitulos():
     data = []
-    for x in range(1, 17):
+    for x in range(1, 43):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "19" : {'Ester': data} } )
+    return jsonify({ "20" : {'Jó': data} } )
 
 #20. Livro de Jo
-@app.route('/api/biblia/20/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/20/versiculos/<capitulo>', methods=['GET'])
 def jo(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/jo/{}".format(capitulo)
 
@@ -947,18 +958,18 @@ def jo(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
     return jsonify({'Jó': data}) 
 
-# 20.Lista de Capitulos do Livro de Jó
-@app.route('/api/biblia/20/capitulos', methods=['GET'])
-def jo_capitulos():
+# 21.Lista de Capitulos do Livro de Salmos
+@app.route('/api/biblia/capitulos/21', methods=['GET'])
+def salmos_capitulos():
     data = []
-    for x in range(1, 43):
+    for x in range(1, 151):
 
         data.append( { "id" : x } ) 
      
-    return jsonify({ "20" : {'Jó': data} } )
+    return jsonify({ "21" : {'Salmos': data} } )
 
 # 21.Livro de Salmos
-@app.route('/api/biblia/21/<capitulo>', methods=['GET'])
+@app.route('/api/biblia/capitulos/21/versiculos/<capitulo>', methods=['GET'])
 def salmos(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/salmos/{}".format(capitulo)
 
@@ -992,15 +1003,6 @@ def salmos(capitulo):
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
     return jsonify({'Salmos': data})
 
-# 21.Lista de Capitulos do Livro de Salmos
-@app.route('/api/biblia/21/capitulos', methods=['GET'])
-def salmos_capitulos():
-    data = []
-    for x in range(1, 151):
-
-        data.append( { "id" : x } ) 
-     
-    return jsonify({ "21" : {'Salmos': data} } )
 
 ####################### FINALIZADO ATÉ AQUI ###################    
 
