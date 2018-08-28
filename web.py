@@ -98,7 +98,7 @@ def genesis(capitulo):
 
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False)
      
-    return jsonify({'genesis': data})  
+    return jsonify({ "1" : {'Gênesis': data} } )  
 
 # 2.Lista de Capitulos do Livro de Exodo
 @app.route('/api/biblia/capitulos/2', methods=['GET'])
@@ -142,7 +142,7 @@ def exodo(capitulo):
         even = even + 1
     
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({'êxodo': data})     
+    return jsonify({ "2" : {'Êxodo': data} } )   
 
 # 3.Lista de Capitulos do Livro de Levítico
 @app.route('/api/biblia/capitulos/3', methods=['GET'])
@@ -187,7 +187,7 @@ def levitico(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({'levítico': data}) 
+    return jsonify({ "3" : {'Levítico': data} } )
 
 # 4.Lista de Capitulos do Livro de Números
 @app.route('/api/biblia/capitulos/4', methods=['GET'])
@@ -233,7 +233,7 @@ def numeros(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({'números': data}) 
+    return jsonify({ "4" : {'Números': data} } )
 
 # 5.Lista de Capitulos do Livro de Deuteronômio
 @app.route('/api/biblia/capitulos/5', methods=['GET'])
@@ -278,7 +278,7 @@ def deuteronomio(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({'deuteronômio': data})  
+    return jsonify({ "5" : {'Deuteronômio': data} } )
 
 # 6.Lista de Capitulos do Livro de Josué
 @app.route('/api/biblia/capitulos/6', methods=['GET'])
@@ -323,7 +323,7 @@ def josue(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({'josué': data})  
+    return jsonify({ "6" : {'Josué': data} } )
 
 # 7.Lista de Capitulos do Livro de Juízes
 @app.route('/api/biblia/capitulos/7', methods=['GET'])
@@ -368,7 +368,7 @@ def juizes(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({'juizes': data})  
+    return jsonify({ "7" : {'Juízes': data} } )
 
 # 8.Lista de Capitulos do Livro de Rute
 @app.route('/api/biblia/capitulos/8', methods=['GET'])
@@ -413,7 +413,7 @@ def rute(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({'rute': data})  
+    return jsonify({ "8" : {'Rute': data} } )
 
 # 9.Lista de Capitulos do Livro de I Samuel
 @app.route('/api/biblia/capitulos/9', methods=['GET'])
@@ -458,7 +458,7 @@ def isamuel(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({'I Samuel': data})  
+    return jsonify({ "9" : {'I Samuel': data} } )
 
 # 10.Lista de Capitulos do Livro de II Samuel
 @app.route('/api/biblia/capitulos/10', methods=['GET'])
@@ -503,7 +503,7 @@ def iisamuel(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({'II Samuel': data}) 
+    return jsonify({ "10" : {'II Samuel': data} } )
 
 
 ################## ATÉ AQUI ESTÁ FINALIZADO ####################
@@ -551,7 +551,7 @@ def ireis(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({'I Reis': data}) 
+    return jsonify({ "11" : {'I Reis': data} } )
 
 # 12.Lista de Capitulos do Livro de II Reis
 @app.route('/api/biblia/capitulos/12', methods=['GET'])
@@ -596,7 +596,7 @@ def iireis(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({'II Reis': data}) 
+    return jsonify({ "12" : {'II Reis': data} } )
 
 # 13.Lista de Capitulos do Livro de I Cronicas
 @app.route('/api/biblia/capitulos/13', methods=['GET'])
@@ -641,7 +641,7 @@ def icronicas(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({'I Crônicas': data}) 
+    return jsonify({ "13" : {'I Crônicas': data} } )
 
 # 14.Lista de Capitulos do Livro de II Cronicas
 @app.route('/api/biblia/capitulos/14', methods=['GET'])
@@ -686,7 +686,7 @@ def iicronicas(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({'II Crônicas': data}) 
+    return jsonify({ "14" : {'II Crônicas': data} } )
 
 # 15.Lista de Capitulos do Livro de Esdras
 @app.route('/api/biblia/capitulos/15', methods=['GET'])
@@ -731,7 +731,7 @@ def esdras(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({'Esdras': data}) 
+    return jsonify({ "15" : {'Esdras': data} } )
 
 # 16.Lista de Capitulos do Livro de I Neemias
 @app.route('/api/biblia/capitulos/16', methods=['GET'])
@@ -741,7 +741,11 @@ def neemias_capitulos():
 
         data.append( { "id" : x } ) 
      
+<<<<<<< HEAD
     return jsonify({ "16" : {'Neemias': data} } )
+=======
+    return jsonify({ "15" : {'Esdras': data} } )
+>>>>>>> 8f7d4b197477cc5daa0322f6061226767986daa5
 
 # 16.Livro de Neemias
 @app.route('/api/biblia/capitulos/16/versiculos/<capitulo>', methods=['GET'])
@@ -776,7 +780,7 @@ def neemias(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({'Neemias': data})
+    return jsonify({ "16" : {'Neemias': data} } )
 
 # 17.Lista de Capitulos do Livro de Tobias
 @app.route('/api/biblia/capitulos/17', methods=['GET'])
@@ -821,7 +825,7 @@ def tobias(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({'Tobias': data}) 
+    return jsonify({ "17" : {'Tobias': data} } )
 
 # 18.Lista de Capitulos do Livro de Judite
 @app.route('/api/biblia/capitulos/18', methods=['GET'])
@@ -866,7 +870,7 @@ def judite(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({'Judite': data})
+    return jsonify({ "18" : {'Judite': data} } )
 
 # 19.Lista de Capitulos do Livro de Ester
 @app.route('/api/biblia/capitulos/19', methods=['GET'])
@@ -911,7 +915,7 @@ def ester(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({'Ester': data})
+    return jsonify({ "19" : {'Ester': data} } )
 
 # 20.Lista de Capitulos do Livro de Jó
 @app.route('/api/biblia/capitulos/20', methods=['GET'])
@@ -956,7 +960,7 @@ def jo(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({'Jó': data}) 
+    return jsonify({ "20" : {'Jó': data} } )
 
 # 21.Lista de Capitulos do Livro de Salmos
 @app.route('/api/biblia/capitulos/21', methods=['GET'])
@@ -1001,7 +1005,7 @@ def salmos(capitulo):
 
 
     data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({'Salmos': data})
+    return jsonify({ "21" : {'Salmos': data} } )
 
 
 ####################### FINALIZADO ATÉ AQUI ###################    
