@@ -61,9 +61,9 @@ def genesis_capitulos():
     data = []
     for x in range(1, 51):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "1" : {'Gênesis': data} } )    
+    return jsonify({ "Testamento" : 1, "Livro" : 'Gênesis'} , {"Capítulos" : data} )    
 
 # 1.Livro de Genesis
 @app.route('/api/biblia/capitulos/1/versiculos/<capitulo>', methods=['GET'])
@@ -84,7 +84,7 @@ def genesis(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " + format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -93,12 +93,11 @@ def genesis(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-    data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False)
-     
-    return jsonify({ "1" : {'Gênesis': data} } )  
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Gênesis', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 2.Lista de Capitulos do Livro de Exodo
 @app.route('/api/biblia/capitulos/2', methods=['GET'])
@@ -106,9 +105,9 @@ def exodo_capitulos():
     data = []
     for x in range(1, 41):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "2" : {'Êxodo': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'Êxodo'} , {"Capítulos" : data} )    
 
 # 2.Livro de Êxodo
 @app.route('/api/biblia/capitulos/2/versiculos/<capitulo>', methods=['GET'])
@@ -124,12 +123,12 @@ def exodo(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+    
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -138,11 +137,11 @@ def exodo(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
-    
-    data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({ "2" : {'Êxodo': data} } )   
+
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Êxodo', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 3.Lista de Capitulos do Livro de Levítico
 @app.route('/api/biblia/capitulos/3', methods=['GET'])
@@ -150,9 +149,9 @@ def levitico_capitulos():
     data = []
     for x in range(1, 28):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "3" : {'Levítico': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'Levítico'} , {"Capítulos" : data} )    
 
 # 3.Livro de Levítico
 @app.route('/api/biblia/capitulos/3/versiculos/<capitulo>', methods=['GET'])
@@ -168,12 +167,12 @@ def levitico(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -182,12 +181,11 @@ def levitico(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({ "3" : {'Levítico': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Levítico', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 4.Lista de Capitulos do Livro de Números
 @app.route('/api/biblia/capitulos/4', methods=['GET'])
@@ -195,10 +193,9 @@ def numeros_capitulos():
     data = []
     for x in range(1, 37):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    
-    return jsonify({ "4" : {'Números': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'Números'} , {"Capítulos" : data} )    
 
 # 4.Livro de Números
 @app.route('/api/biblia/capitulos/4/versiculos/<capitulo>', methods=['GET'])
@@ -214,12 +211,12 @@ def numeros(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -228,12 +225,11 @@ def numeros(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({ "4" : {'Números': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Números', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 5.Lista de Capitulos do Livro de Deuteronômio
 @app.route('/api/biblia/capitulos/5', methods=['GET'])
@@ -241,9 +237,9 @@ def deuteronomio_capitulos():
     data = []
     for x in range(1, 35):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "5" : {'Deuteronômio': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'Deuteronômio'} , {"Capítulos" : data} )    
 
 # 5.Livro de Deuteronômio
 @app.route('/api/biblia/capitulos/5/versiculos/<capitulo>', methods=['GET'])
@@ -259,12 +255,12 @@ def deuteronomio(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -273,12 +269,11 @@ def deuteronomio(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({ "5" : {'Deuteronômio': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Deuteronômio', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 6.Lista de Capitulos do Livro de Josué
 @app.route('/api/biblia/capitulos/6', methods=['GET'])
@@ -286,9 +281,9 @@ def josue_capitulos():
     data = []
     for x in range(1, 25):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "6" : {'Josué': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'Josué'} , {"Capítulos" : data} )    
 
 # 6.Livro de Josué
 @app.route('/api/biblia/capitulos/6/versiculos/<capitulo>', methods=['GET'])
@@ -304,12 +299,12 @@ def josue(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -318,12 +313,11 @@ def josue(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({ "6" : {'Josué': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Josué', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 7.Lista de Capitulos do Livro de Juízes
 @app.route('/api/biblia/capitulos/7', methods=['GET'])
@@ -331,9 +325,9 @@ def juizes_capitulos():
     data = []
     for x in range(1, 22):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "7" : {'Juízes': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'Juízes'} , {"Capítulos" : data} )    
 
 # 7.Livro de Juizes
 @app.route('/api/biblia/capitulos/7/versiculos/<capitulo>', methods=['GET'])
@@ -349,12 +343,12 @@ def juizes(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -363,12 +357,11 @@ def juizes(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({ "7" : {'Juízes': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Juízes', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 8.Lista de Capitulos do Livro de Rute
 @app.route('/api/biblia/capitulos/8', methods=['GET'])
@@ -376,10 +369,10 @@ def rute_capitulos():
     data = []
     for x in range(1, 5):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "8" : {'Rute': data} } )
-
+    return jsonify({ "Testamento" : 1, "Livro" : 'Rute'} , {"Capítulos" : data} )    
+    
 # 8.Livro de Rute
 @app.route('/api/biblia/capitulos/8/versiculos/<capitulo>', methods=['GET'])
 def rute(capitulo):
@@ -394,12 +387,12 @@ def rute(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -408,12 +401,11 @@ def rute(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({ "8" : {'Rute': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Rute', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 9.Lista de Capitulos do Livro de I Samuel
 @app.route('/api/biblia/capitulos/9', methods=['GET'])
@@ -421,9 +413,9 @@ def isamuel_capitulos():
     data = []
     for x in range(1, 32):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "9" : {'I Samuel': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'I Samuel'} , {"Capítulos" : data} )    
 
 # 9.Livro de I Samuel
 @app.route('/api/biblia/capitulos/9/versiculos/<capitulo>', methods=['GET'])
@@ -439,12 +431,12 @@ def isamuel(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -453,12 +445,11 @@ def isamuel(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({ "9" : {'I Samuel': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'I Samuel', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 10.Lista de Capitulos do Livro de II Samuel
 @app.route('/api/biblia/capitulos/10', methods=['GET'])
@@ -466,9 +457,9 @@ def iisamuel_capitulos():
     data = []
     for x in range(1, 25):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "10" : {'II Samuel': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'II Samuel'} , {"Capítulos" : data} )    
 
 # 10.Livro de II Samuel
 @app.route('/api/biblia/capitulos/10/versiculos/<capitulo>', methods=['GET'])
@@ -484,12 +475,12 @@ def iisamuel(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -498,12 +489,11 @@ def iisamuel(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo '+format(capitulo)].get('versiculo', 0), reverse=False)
-    return jsonify({ "10" : {'II Samuel': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'II Samuel', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 
 ################## ATÉ AQUI ESTÁ FINALIZADO ####################
@@ -514,9 +504,9 @@ def ireis_capitulos():
     data = []
     for x in range(1, 27):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "11" : {'I Reis': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'I Reis'} , {"Capítulos" : data} )    
 
 # 11.Livro de I Reis
 @app.route('/api/biblia/capitulos/11/versiculos/<capitulo>', methods=['GET'])
@@ -532,12 +522,12 @@ def ireis(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -546,12 +536,11 @@ def ireis(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({ "11" : {'I Reis': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'I Reis', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 12.Lista de Capitulos do Livro de II Reis
 @app.route('/api/biblia/capitulos/12', methods=['GET'])
@@ -559,9 +548,9 @@ def iireis_capitulos():
     data = []
     for x in range(1, 26):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "12" : {'II Reis': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'II Reis'} , {"Capítulos" : data} )    
 
 # 12.Livro de II Reis
 @app.route('/api/biblia/capitulos/12/versiculos/<capitulo>', methods=['GET'])
@@ -577,12 +566,12 @@ def iireis(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -591,12 +580,11 @@ def iireis(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({ "12" : {'II Reis': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'II Reis', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 13.Lista de Capitulos do Livro de I Cronicas
 @app.route('/api/biblia/capitulos/13', methods=['GET'])
@@ -604,9 +592,9 @@ def icronicas_capitulos():
     data = []
     for x in range(1, 30):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "13" : {'I Crônicas': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'I Crônicas'} , {"Capítulos" : data} )    
 
 #13.Livro de I Crônicas
 @app.route('/api/biblia/capitulos/13/versiculos/<capitulo>', methods=['GET'])
@@ -622,12 +610,12 @@ def icronicas(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -636,12 +624,11 @@ def icronicas(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } )  
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({ "13" : {'I Crônicas': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'I Crônicas', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 14.Lista de Capitulos do Livro de II Cronicas
 @app.route('/api/biblia/capitulos/14', methods=['GET'])
@@ -649,9 +636,9 @@ def iicronicas_capitulos():
     data = []
     for x in range(1, 37):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "14" : {'II Crônicas': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'II Crônicas'} , {"Capítulos" : data} )    
 
 #Livro de I4 Cronicas
 @app.route('/api/biblia/capitulos/14/versiculos/<capitulo>', methods=['GET'])
@@ -667,12 +654,12 @@ def iicronicas(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -681,12 +668,11 @@ def iicronicas(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({ "14" : {'II Crônicas': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'II Crônicas', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 15.Lista de Capitulos do Livro de Esdras
 @app.route('/api/biblia/capitulos/15', methods=['GET'])
@@ -694,9 +680,9 @@ def esdras_capitulos():
     data = []
     for x in range(1, 11):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "50" : {'Esdras': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'Esdras'} , {"Capítulos" : data} )    
 
 #15.Livro de Esdras
 @app.route('/api/biblia/capitulos/15/versiculos/<capitulo>', methods=['GET'])
@@ -712,12 +698,12 @@ def esdras(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -726,12 +712,11 @@ def esdras(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({ "15" : {'Esdras': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Esdras', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 16.Lista de Capitulos do Livro de I Neemias
 @app.route('/api/biblia/capitulos/16', methods=['GET'])
@@ -739,13 +724,9 @@ def neemias_capitulos():
     data = []
     for x in range(1, 14):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-<<<<<<< HEAD
-    return jsonify({ "16" : {'Neemias': data} } )
-=======
-    return jsonify({ "15" : {'Esdras': data} } )
->>>>>>> 8f7d4b197477cc5daa0322f6061226767986daa5
+    return jsonify({ "Testamento" : 1, "Livro" : 'Neemias'} , {"Capítulos" : data} )    
 
 # 16.Livro de Neemias
 @app.route('/api/biblia/capitulos/16/versiculos/<capitulo>', methods=['GET'])
@@ -761,12 +742,12 @@ def neemias(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -775,12 +756,11 @@ def neemias(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({ "16" : {'Neemias': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Neemias', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 17.Lista de Capitulos do Livro de Tobias
 @app.route('/api/biblia/capitulos/17', methods=['GET'])
@@ -788,9 +768,9 @@ def tobias_capitulos():
     data = []
     for x in range(1, 15):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "17" : {'Tobias': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'Tobias'} , {"Capítulos" : data} )    
 
 # 17.Livro de Tobias
 @app.route('/api/biblia/capitulos/17/versiculos/<capitulo>', methods=['GET'])
@@ -806,12 +786,12 @@ def tobias(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } )  
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -820,12 +800,11 @@ def tobias(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({ "17" : {'Tobias': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Tobias', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 18.Lista de Capitulos do Livro de Judite
 @app.route('/api/biblia/capitulos/18', methods=['GET'])
@@ -833,9 +812,9 @@ def judite_capitulos():
     data = []
     for x in range(1, 17):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "18" : {'Judite': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'Judite'} , {"Capítulos" : data} )    
 
 #18. Livro de Judite
 @app.route('/api/biblia/capitulos/18/versiculos/<capitulo>', methods=['GET'])
@@ -851,12 +830,12 @@ def judite(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -865,12 +844,11 @@ def judite(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({ "18" : {'Judite': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Judite', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 19.Lista de Capitulos do Livro de Ester
 @app.route('/api/biblia/capitulos/19', methods=['GET'])
@@ -878,9 +856,9 @@ def ester_capitulos():
     data = []
     for x in range(1, 17):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "19" : {'Ester': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'Ester'} , {"Capítulos" : data} )    
 
 #19. Livro de Ester
 @app.route('/api/biblia/capitulos/19/versiculos/<capitulo>', methods=['GET'])
@@ -896,12 +874,12 @@ def ester(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -910,12 +888,11 @@ def ester(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({ "19" : {'Ester': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Ester', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 20.Lista de Capitulos do Livro de Jó
 @app.route('/api/biblia/capitulos/20', methods=['GET'])
@@ -923,9 +900,9 @@ def jo_capitulos():
     data = []
     for x in range(1, 43):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "20" : {'Jó': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'Jó'} , {"Capítulos" : data} )    
 
 #20. Livro de Jo
 @app.route('/api/biblia/capitulos/20/versiculos/<capitulo>', methods=['GET'])
@@ -941,12 +918,12 @@ def jo(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -955,12 +932,11 @@ def jo(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({ "20" : {'Jó': data} } )
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Jó', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 # 21.Lista de Capitulos do Livro de Salmos
 @app.route('/api/biblia/capitulos/21', methods=['GET'])
@@ -968,9 +944,9 @@ def salmos_capitulos():
     data = []
     for x in range(1, 151):
 
-        data.append( { "id" : x } ) 
+        data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "21" : {'Salmos': data} } )
+    return jsonify({ "Testamento" : 1, "Livro" : 'Salmos'} , {"Capítulos" : data} )    
 
 # 21.Livro de Salmos
 @app.route('/api/biblia/capitulos/21/versiculos/<capitulo>', methods=['GET'])
@@ -986,12 +962,12 @@ def salmos(capitulo):
     data = []
 
     for dataBox in soup.find_all("p", class_="odd"):
-
+        
         s = dataBox.text
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1000,13 +976,11 @@ def salmos(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "Capítulo " +format(capitulo) : { "versiculo" : v, "texto" : s } } ) 
+        data.append( { "versiculo" : v, "texto" : s }  ) 
         even = even + 1
 
-
-    data = sorted(data, key=lambda k: k['Capítulo ' +format(capitulo)].get('versiculo', 0), reverse=False) 
-    return jsonify({ "21" : {'Salmos': data} } )
-
+    data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
+    return jsonify({ "Testamento" : 1, "Livro" : 'Salmos', "Capítulo" : capitulo } , {"Versículos" : data} )
 
 ####################### FINALIZADO ATÉ AQUI ###################    
 
