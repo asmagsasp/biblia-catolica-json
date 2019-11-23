@@ -2,6 +2,8 @@
 from bs4 import BeautifulSoup
 import os   
 import urllib.request as urllib2
+import sqlite3
+import requests
 
 app = Flask(__name__)
 
@@ -10,6 +12,66 @@ URL = "https://www.bibliacatolica.com.br/"
 #####################################################################################
 #                                    INÍCIO                                         #
 # ###################################################################################    
+
+def get_connection():
+    con = sqlite3.connect('biblia.db')
+    return con
+
+def close_connection(some_con):
+    some_con.commit()
+    some_con.close()
+     
+def create_database(cursor):
+    # criando a tabela (schema) - livros
+    cursor.execute("""
+    CREATE TABLE if not exists livros (
+            id INTEGER NOT NULL PRIMARY KEY,
+            nome TEXT NOT NULL
+    );
+    """)
+ 
+    # criando a tabela (schema) - lista_livros
+    cursor.execute("""
+    CREATE TABLE if not exists lista_livros (
+            id INTEGER NOT NULL PRIMARY KEY,
+            livro TEXT NOT NULL,
+            testamento INTEGER NOT NULL,
+            total INTEGER
+    );
+    """)
+ 
+    # criando a tabela (schema) - versiculos
+    cursor.execute("""
+    CREATE TABLE if not exists versiculos (
+            id_livro INTEGER NOT NULL,
+            id_capitulo INTEGER NOT NULL,
+            id_versiculo INTEGER NOT NULL,
+            texto TEXT NOT NULL,
+            PRIMARY KEY (id_livro, id_capitulo, id_versiculo)
+    );
+    """)
+
+def inserir_lista(id,livro,testamento,total):
+    # inserindo dados na tabela
+    registro = "insert into lista_livros (id,livro,testamento,total) values (" + str(id) +",'"+ livro+"',"+str(testamento)+","+ str(total) + ")"
+    #conn = criar_database(id)
+    #cursor = conn.cursor()
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute(registro)
+    conn.commit()
+
+def inserir_versiculo(id_livro,id_capitulo,id_versiculo,texto):
+    # inserindo dados na tabela
+    registro = "insert into versiculos (id_livro,id_capitulo,id_versiculo,texto) values (" + str(id_livro) +","+ str(id_capitulo)+","+str(id_versiculo)+",'"+ texto + "')"
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(registro)
+    conn.commit()
 
     
 # Retorna todos os livros da bíblia
@@ -25,10 +87,14 @@ def livros():
     data = []
 
     prior_word = ""
+    current_word = ""
     i = 0
     testamento = 1
     seta_testamento = 0
 
+    conn = get_connection()
+    cursor = conn.cursor()
+  
     for dataBox in soup.find_all("div", class_="row booksList"):
 
         s = dataBox.text
@@ -41,6 +107,8 @@ def livros():
 
         for current_word in words:
             
+            current_word = current_word.strip()
+
             if current_word != "":
 
                if current_word == "I" or current_word == "I#São" or current_word == "II" or current_word == "II#São" or  current_word == "III" or current_word == "III#São" or current_word == "São" or current_word == "Cântico" or current_word == "Atos":
@@ -51,18 +119,89 @@ def livros():
                     current_frase = prior_word + ' ' + current_word
                     if current_frase == "Atos dos" or current_frase == "Cântico dos":
                        prior_word = current_frase
-                    else:       
+                    elif current_frase != "":       
                        i = i + 1
 
                        data.append( { "id" : i, "nome" : current_frase  } )
                        prior_word = ""
 
-               else:   
+                       # inserindo dados na tabela
+                       registro = "insert into livros (id, nome) values (" + str(i) + ",'" + current_frase + "')"
+                       cursor.execute(registro)
+                       conn.commit()
+
+                       print(registro)
+
+               elif current_word != "":   
                   i = i + 1
 
-                  data.append( { "id" : i,  "nome" : current_word } )    
+                  data.append( { "id" : i,  "nome" : current_word } )   
 
+                  # inserindo dados na tabela
+                  registro = "insert into livros (id, nome) values (" + str(i) + ",'" + current_word + "')"
+                  cursor.execute(registro)
+                  conn.commit()
+
+                  print(registro)
+
+    close_connection
     return jsonify( data )  
+
+# 1.Insere quantidade de livros no banco
+@app.route('/api/biblia/lista_livros', methods=['GET'])
+def lista_livros():
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    create_database(cursor)
+
+    for numero_livro in range(74):
+        req  = requests.get("http://127.0.0.1:5000/api/biblia/capitulos/" + str(numero_livro))
+        conn.commit()
+
+    close_connection
+    return "Ok"
+
+# 1.Insere conteúdo dos livros no banco
+@app.route('/api/biblia/capitulos/<livro>/versiculos', methods=['GET'])
+def livro_versiculos(livro):
+    numero_livro = "{}".format(livro)
+    # lendo os dados
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    create_database(cursor)
+
+    #print(conn)
+
+    cursor.execute("select * from lista_livros where id = " + numero_livro)
+
+    for linha in cursor.fetchall():
+        versiculos = int(linha[3])+1
+        for ver in range(versiculos):
+            if ver > 0 :
+               req  = requests.get("http://127.0.0.1:5000/api/biblia/capitulos/" + numero_livro + "/versiculos/" + str(ver))
+
+    close_connection
+    return "Ok"
+
+# 1.Insere conteúdo dos livros no banco
+@app.route('/api/biblia/versiculos', methods=['GET'])
+def versiculos():
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    create_database(cursor)
+
+    #print(conn)
+
+    for livro in range(74):
+        if livro > 0:
+           req  = requests.get("http://127.0.0.1:5000/api/biblia/capitulos/" + str(livro) + "/versiculos")
+           close_connection
+
+    return "Ok"
+
 
 #####################################################################################
 #                          PRIMEIRO TESTAMENTO                                      #
@@ -71,14 +210,20 @@ def livros():
 # 1.Lista de Capitulos do Livro de Genesis
 @app.route('/api/biblia/capitulos/1', methods=['GET'])
 def genesis_capitulos():
+
     data = []
+    
+    inserir_lista(1,'Gênesis',1, 50)
+
     for x in range(1, 51):
 
         data.append( { "capítulo" : x } ) 
      
     return jsonify( {"Testamento" : 1, "Livro" : 'Gênesis', "Capítulos" : data } )    
 
-###################################################################################    
+###################################################################################   
+# 
+#  
 
 # 1.Livro de Genesis
 @app.route('/api/biblia/capitulos/1/versiculos/<capitulo>', methods=['GET'])
@@ -100,6 +245,7 @@ def genesis(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(1,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -109,6 +255,7 @@ def genesis(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(1,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -120,6 +267,7 @@ def genesis(capitulo):
 @app.route('/api/biblia/capitulos/2', methods=['GET'])
 def exodo_capitulos():
     data = []
+    inserir_lista(2,'Êxodo',1, 40)
     for x in range(1, 41):
 
         data.append( { "capítulo" : x } ) 
@@ -153,6 +301,7 @@ def exodo(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(2,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -162,6 +311,7 @@ def exodo(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(2,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -173,6 +323,8 @@ def exodo(capitulo):
 @app.route('/api/biblia/capitulos/3', methods=['GET'])
 def levitico_capitulos():
     data = []
+
+    inserir_lista(3,'Levítico',1, 27)
     for x in range(1, 28):
 
         data.append( { "capítulo" : x } ) 
@@ -206,6 +358,7 @@ def levitico(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(3,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -215,6 +368,7 @@ def levitico(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(3,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -226,6 +380,8 @@ def levitico(capitulo):
 @app.route('/api/biblia/capitulos/4', methods=['GET'])
 def numeros_capitulos():
     data = []
+
+    inserir_lista(4,'Números',1, 36)
     for x in range(1, 37):
 
         data.append( { "capítulo" : x } ) 
@@ -259,6 +415,7 @@ def numeros(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(4,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -268,6 +425,7 @@ def numeros(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(4,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -279,6 +437,8 @@ def numeros(capitulo):
 @app.route('/api/biblia/capitulos/5', methods=['GET'])
 def deuteronomio_capitulos():
     data = []
+
+    inserir_lista(5,'Deuteronômio',1, 34)
     for x in range(1, 35):
 
         data.append( { "capítulo" : x } ) 
@@ -312,6 +472,7 @@ def deuteronomio(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(5,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -321,6 +482,7 @@ def deuteronomio(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(5,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -332,6 +494,8 @@ def deuteronomio(capitulo):
 @app.route('/api/biblia/capitulos/6', methods=['GET'])
 def josue_capitulos():
     data = []
+
+    inserir_lista(6,'Josué',1, 24)
     for x in range(1, 25):
 
         data.append( { "capítulo" : x } ) 
@@ -365,6 +529,7 @@ def josue(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(6,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -374,6 +539,7 @@ def josue(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(6,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -385,6 +551,8 @@ def josue(capitulo):
 @app.route('/api/biblia/capitulos/7', methods=['GET'])
 def juizes_capitulos():
     data = []
+
+    inserir_lista(7,'Juízes',1, 21)
     for x in range(1, 22):
 
         data.append( { "capítulo" : x } ) 
@@ -418,6 +586,7 @@ def juizes(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(7,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -427,6 +596,7 @@ def juizes(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(7,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -438,6 +608,8 @@ def juizes(capitulo):
 @app.route('/api/biblia/capitulos/8', methods=['GET'])
 def rute_capitulos():
     data = []
+
+    inserir_lista(8,'Rute',1, 4)
     for x in range(1, 5):
 
         data.append( { "capítulo" : x } ) 
@@ -471,6 +643,7 @@ def rute(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(8,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -480,6 +653,7 @@ def rute(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(8,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -491,6 +665,8 @@ def rute(capitulo):
 @app.route('/api/biblia/capitulos/9', methods=['GET'])
 def isamuel_capitulos():
     data = []
+
+    inserir_lista(9,'I Samuel',1, 31)
     for x in range(1, 32):
 
         data.append( { "capítulo" : x } ) 
@@ -524,6 +700,7 @@ def isamuel(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(9,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -533,6 +710,7 @@ def isamuel(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(9,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -544,6 +722,8 @@ def isamuel(capitulo):
 @app.route('/api/biblia/capitulos/10', methods=['GET'])
 def iisamuel_capitulos():
     data = []
+
+    inserir_lista(10,'II Samuel',1, 24)
     for x in range(1, 25):
 
         data.append( { "capítulo" : x } ) 
@@ -577,6 +757,7 @@ def iisamuel(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(10,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -585,7 +766,8 @@ def iisamuel(capitulo):
         verso = s[:3]
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
-        data.append( { "versiculo" : v, "texto" : s }  ) 
+        data.append( { "versiculo" : v, "texto" : s }  )
+        inserir_versiculo(10,capitulo,v,s) 
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -597,6 +779,8 @@ def iisamuel(capitulo):
 @app.route('/api/biblia/capitulos/11', methods=['GET'])
 def ireis_capitulos():
     data = []
+
+    inserir_lista(11,'I Reis',1, 22)
     for x in range(1, 23):
 
         data.append( { "capítulo" : x } ) 
@@ -630,6 +814,7 @@ def ireis(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(11,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -639,6 +824,7 @@ def ireis(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(11,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -650,6 +836,8 @@ def ireis(capitulo):
 @app.route('/api/biblia/capitulos/12', methods=['GET'])
 def iireis_capitulos():
     data = []
+
+    inserir_lista(12,'II Reis',1, 25)
     for x in range(1, 26):
 
         data.append( { "capítulo" : x } ) 
@@ -683,6 +871,7 @@ def iireis(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(12,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -692,6 +881,7 @@ def iireis(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(12,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -703,6 +893,8 @@ def iireis(capitulo):
 @app.route('/api/biblia/capitulos/13', methods=['GET'])
 def icronicas_capitulos():
     data = []
+
+    inserir_lista(13,'I Crônicas',1, 29)
     for x in range(1, 30):
 
         data.append( { "capítulo" : x } ) 
@@ -736,6 +928,7 @@ def icronicas(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(13,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -745,6 +938,7 @@ def icronicas(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(13,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -756,6 +950,8 @@ def icronicas(capitulo):
 @app.route('/api/biblia/capitulos/14', methods=['GET'])
 def iicronicas_capitulos():
     data = []
+
+    inserir_lista(14,'II Crônicas',1, 36)
     for x in range(1, 37):
 
         data.append( { "capítulo" : x } ) 
@@ -789,6 +985,7 @@ def iicronicas(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(14,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -798,6 +995,7 @@ def iicronicas(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(14,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -809,6 +1007,9 @@ def iicronicas(capitulo):
 @app.route('/api/biblia/capitulos/15', methods=['GET'])
 def esdras_capitulos():
     data = []
+    
+    inserir_lista(15,'Esdras',1, 10)
+
     for x in range(1, 11):
 
         data.append( { "capítulo" : x } ) 
@@ -842,6 +1043,7 @@ def esdras(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(15,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -851,6 +1053,7 @@ def esdras(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(15,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -862,6 +1065,9 @@ def esdras(capitulo):
 @app.route('/api/biblia/capitulos/16', methods=['GET'])
 def neemias_capitulos():
     data = []
+
+    inserir_lista(16,'Neemias',1, 13)
+
     for x in range(1, 14):
 
         data.append( { "capítulo" : x } ) 
@@ -895,6 +1101,7 @@ def neemias(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(16,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -904,6 +1111,7 @@ def neemias(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(16,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -915,6 +1123,9 @@ def neemias(capitulo):
 @app.route('/api/biblia/capitulos/17', methods=['GET'])
 def tobias_capitulos():
     data = []
+
+    inserir_lista(17,'Tobias',1, 14)
+    
     for x in range(1, 15):
 
         data.append( { "capítulo" : x } ) 
@@ -948,6 +1159,7 @@ def tobias(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(17,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -957,6 +1169,7 @@ def tobias(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(17,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -968,6 +1181,8 @@ def tobias(capitulo):
 @app.route('/api/biblia/capitulos/18', methods=['GET'])
 def judite_capitulos():
     data = []
+
+    inserir_lista(18,'Judite',1, 16)
     for x in range(1, 17):
 
         data.append( { "capítulo" : x } ) 
@@ -1001,6 +1216,7 @@ def judite(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(18,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1010,6 +1226,7 @@ def judite(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(18,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1021,6 +1238,8 @@ def judite(capitulo):
 @app.route('/api/biblia/capitulos/19', methods=['GET'])
 def ester_capitulos():
     data = []
+
+    inserir_lista(19,'Ester',1, 16)
     for x in range(1, 17):
 
         data.append( { "capítulo" : x } ) 
@@ -1054,6 +1273,7 @@ def ester(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(19,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1063,6 +1283,7 @@ def ester(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(19,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1074,6 +1295,8 @@ def ester(capitulo):
 @app.route('/api/biblia/capitulos/20', methods=['GET'])
 def jo_capitulos():
     data = []
+
+    inserir_lista(20,'Jó',1, 42)
     for x in range(1, 43):
 
         data.append( { "capítulo" : x } ) 
@@ -1107,6 +1330,7 @@ def jo(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(20,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1116,6 +1340,7 @@ def jo(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(20,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1126,7 +1351,9 @@ def jo(capitulo):
 # 21.Lista de Capitulos do Livro de Salmos
 @app.route('/api/biblia/capitulos/21', methods=['GET'])
 def salmos_capitulos():
-    data = []
+    data = [] 
+    inserir_lista(21,'Salmos',1, 150)
+
     for x in range(1, 151):
 
         data.append( { "capítulo" : x } ) 
@@ -1160,6 +1387,7 @@ def salmos(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(21,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1169,6 +1397,7 @@ def salmos(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(21,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1179,7 +1408,9 @@ def salmos(capitulo):
 # 22.Lista de Capitulos do I Macabeus
 @app.route('/api/biblia/capitulos/22', methods=['GET'])
 def i_macabeus_capitulos():
-    data = []
+    data = [] 
+
+    inserir_lista(22,'I Macabeus',1, 16)
     for x in range(1, 17):
 
         data.append( { "capítulo" : x } ) 
@@ -1213,6 +1444,7 @@ def i_macabeus(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(22,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1222,6 +1454,7 @@ def i_macabeus(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(22,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1233,6 +1466,8 @@ def i_macabeus(capitulo):
 @app.route('/api/biblia/capitulos/23', methods=['GET'])
 def ii_macabeus_capitulos():
     data = []
+
+    inserir_lista(23,'II Macabeis',1, 15)
     for x in range(1, 16):
 
         data.append( { "capítulo" : x } ) 
@@ -1266,6 +1501,7 @@ def ii_macabeus(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(23,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1275,6 +1511,7 @@ def ii_macabeus(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(23,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1286,6 +1523,8 @@ def ii_macabeus(capitulo):
 @app.route('/api/biblia/capitulos/24', methods=['GET'])
 def proverbios_capitulos():
     data = []
+
+    inserir_lista(24,'Provérbios',1, 31)
     for x in range(1, 32):
 
         data.append( { "capítulo" : x } ) 
@@ -1319,6 +1558,7 @@ def proverbios(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(24,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1328,6 +1568,7 @@ def proverbios(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(24,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1339,6 +1580,8 @@ def proverbios(capitulo):
 @app.route('/api/biblia/capitulos/25', methods=['GET'])
 def eclesiastes_capitulos():
     data = []
+
+    inserir_lista(25,'Eclesiastes',1, 12)
     for x in range(1, 13):
 
         data.append( { "capítulo" : x } ) 
@@ -1372,6 +1615,7 @@ def eclesiastes(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(25,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1381,6 +1625,7 @@ def eclesiastes(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(25,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1391,7 +1636,9 @@ def eclesiastes(capitulo):
 # 26.Lista de Capitulos do Cântico cos canticos
 @app.route('/api/biblia/capitulos/26', methods=['GET'])
 def cantico_dos_canticos_capitulos():
-    data = []
+    data = [] 
+
+    inserir_lista(26,'Cântico dos Cânticos',1, 8)
     for x in range(1, 9):
 
         data.append( { "capítulo" : x } ) 
@@ -1425,6 +1672,7 @@ def cantico_dos_canticos(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(26,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1434,6 +1682,7 @@ def cantico_dos_canticos(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(26,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1445,6 +1694,8 @@ def cantico_dos_canticos(capitulo):
 @app.route('/api/biblia/capitulos/27', methods=['GET'])
 def sabedoria_capitulos():
     data = []
+
+    inserir_lista(27,'Sabedoria',1, 19)
     for x in range(1, 20):
 
         data.append( { "capítulo" : x } ) 
@@ -1478,6 +1729,7 @@ def sabedoria(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(27,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1487,6 +1739,7 @@ def sabedoria(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(27,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1498,6 +1751,8 @@ def sabedoria(capitulo):
 @app.route('/api/biblia/capitulos/28', methods=['GET'])
 def eclesiastico_capitulos():
     data = []
+
+    inserir_lista(28,'I Crônicas',1, 29)
     for x in range(1, 52):
 
         data.append( { "capítulo" : x } ) 
@@ -1531,6 +1786,7 @@ def eclesiastico(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(28,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1540,6 +1796,7 @@ def eclesiastico(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(28,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1551,6 +1808,8 @@ def eclesiastico(capitulo):
 @app.route('/api/biblia/capitulos/29', methods=['GET'])
 def isaias_capitulos():
     data = []
+
+    inserir_lista(29,'Isaías',1, 66)
     for x in range(1, 67):
 
         data.append( { "capítulo" : x } ) 
@@ -1584,6 +1843,7 @@ def isaias(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(29,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1593,6 +1853,7 @@ def isaias(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(29,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1604,6 +1865,8 @@ def isaias(capitulo):
 @app.route('/api/biblia/capitulos/30', methods=['GET'])
 def jeremias_capitulos():
     data = []
+
+    inserir_lista(30,'Jeremias',1, 52)
     for x in range(1, 53):
 
         data.append( { "capítulo" : x } ) 
@@ -1637,6 +1900,7 @@ def jeremias(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(30,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1646,6 +1910,8 @@ def jeremias(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(30,capitulo,v,s)
+        
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1657,6 +1923,8 @@ def jeremias(capitulo):
 @app.route('/api/biblia/capitulos/31', methods=['GET'])
 def lamentacoes_capitulos():
     data = []
+
+    inserir_lista(31,'Lamentações',1, 5)
     for x in range(1, 6):
 
         data.append( { "capítulo" : x } ) 
@@ -1690,6 +1958,7 @@ def lamentacoes(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(31,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1699,6 +1968,7 @@ def lamentacoes(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(31,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1706,10 +1976,12 @@ def lamentacoes(capitulo):
  
 ###################################################################################
 
-# 31.Lista de Capitulos de Baruc
+# 32.Lista de Capitulos de Baruc
 @app.route('/api/biblia/capitulos/32', methods=['GET'])
 def baruc_capitulos():
     data = []
+
+    inserir_lista(32,'Baruc',1, 6)
     for x in range(1, 7):
 
         data.append( { "capítulo" : x } ) 
@@ -1718,7 +1990,7 @@ def baruc_capitulos():
 
 ###################################################################################
 
-# 31. Livro de Cântico de Baruc
+# 32. Livro de Cântico de Baruc
 @app.route('/api/biblia/capitulos/32/versiculos/<capitulo>', methods=['GET'])
 def baruc(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/baruc{}".format(capitulo)
@@ -1743,6 +2015,7 @@ def baruc(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(32,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1752,6 +2025,7 @@ def baruc(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(32,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1763,6 +2037,7 @@ def baruc(capitulo):
 @app.route('/api/biblia/capitulos/33', methods=['GET'])
 def exequiel_capitulos():
     data = []
+    inserir_lista(33,'Ezequiel',1, 48)
     for x in range(1, 49):
 
         data.append( { "capítulo" : x } ) 
@@ -1796,6 +2071,7 @@ def exequiel(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(33,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1805,6 +2081,7 @@ def exequiel(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(33,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1816,6 +2093,9 @@ def exequiel(capitulo):
 @app.route('/api/biblia/capitulos/34', methods=['GET'])
 def daniel_capitulos():
     data = []
+    
+    inserir_lista(34,'Daniel',1, 14)
+
     for x in range(1, 15):
 
         data.append( { "capítulo" : x } ) 
@@ -1849,6 +2129,7 @@ def daniel(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(34,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1858,6 +2139,7 @@ def daniel(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(34,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1869,6 +2151,8 @@ def daniel(capitulo):
 @app.route('/api/biblia/capitulos/35', methods=['GET'])
 def oseias_capitulos():
     data = []
+
+    inserir_lista(35,'Oseias',1, 14)
     for x in range(1, 15):
 
         data.append( { "capítulo" : x } ) 
@@ -1902,6 +2186,7 @@ def oseias(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(35,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1911,6 +2196,7 @@ def oseias(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(35,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1922,6 +2208,8 @@ def oseias(capitulo):
 @app.route('/api/biblia/capitulos/36', methods=['GET'])
 def joel_capitulos():
     data = []
+
+    inserir_lista(36,'Joel',1, 4)
     for x in range(1, 5):
 
         data.append( { "capítulo" : x } ) 
@@ -1955,6 +2243,7 @@ def joel(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(36,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -1964,6 +2253,7 @@ def joel(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(36,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -1973,6 +2263,8 @@ def joel(capitulo):
 @app.route('/api/biblia/capitulos/37', methods=['GET'])
 def amos_capitulos():
     data = []
+
+    inserir_lista(37,'Amós',1, 4)
     for x in range(1, 5):
 
         data.append( { "capítulo" : x } ) 
@@ -2006,6 +2298,7 @@ def amos(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(37,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2015,6 +2308,7 @@ def amos(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(37,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2024,6 +2318,8 @@ def amos(capitulo):
 @app.route('/api/biblia/capitulos/38', methods=['GET'])
 def abdias_capitulos():
     data = []
+
+    inserir_lista(38,'Abdias',1, 1)
     for x in range(1, 2):
 
         data.append( { "capítulo" : x } ) 
@@ -2057,6 +2353,7 @@ def abdias(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(38,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2066,6 +2363,7 @@ def abdias(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(38,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2075,6 +2373,8 @@ def abdias(capitulo):
 @app.route('/api/biblia/capitulos/39', methods=['GET'])
 def jonas_capitulos():
     data = []
+
+    inserir_lista(39,'Jonas',1, 4)
     for x in range(1, 5):
 
         data.append( { "capítulo" : x } ) 
@@ -2108,6 +2408,7 @@ def jonas(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(39,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2117,6 +2418,7 @@ def jonas(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(39,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2126,6 +2428,8 @@ def jonas(capitulo):
 @app.route('/api/biblia/capitulos/40', methods=['GET'])
 def miqueias_capitulos():
     data = []
+
+    inserir_lista(40,'Miquéias',1, 7)
     for x in range(1, 8):
 
         data.append( { "capítulo" : x } ) 
@@ -2159,6 +2463,7 @@ def miqueias(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(40,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2168,6 +2473,7 @@ def miqueias(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(40,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2177,6 +2483,8 @@ def miqueias(capitulo):
 @app.route('/api/biblia/capitulos/41', methods=['GET'])
 def naum_capitulos():
     data = []
+
+    inserir_lista(41,'Miquéias',1, 3)
     for x in range(1, 4):
 
         data.append( { "capítulo" : x } ) 
@@ -2210,6 +2518,7 @@ def naum(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(41,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2219,6 +2528,7 @@ def naum(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(41,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2230,6 +2540,8 @@ def naum(capitulo):
 @app.route('/api/biblia/capitulos/42', methods=['GET'])
 def habacuc_capitulos():
     data = []
+
+    inserir_lista(42,'Habacuc',1, 3)
     for x in range(1, 4):
 
         data.append( { "capítulo" : x } ) 
@@ -2263,6 +2575,7 @@ def habacuc(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(42,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2272,6 +2585,7 @@ def habacuc(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(42,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2283,6 +2597,8 @@ def habacuc(capitulo):
 @app.route('/api/biblia/capitulos/43', methods=['GET'])
 def sofonias_capitulos():
     data = []
+
+    inserir_lista(43,'Sofonias',1, 3)
     for x in range(1, 4):
 
         data.append( { "capítulo" : x } ) 
@@ -2316,6 +2632,7 @@ def sofonias(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(43,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2325,6 +2642,7 @@ def sofonias(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(43,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2336,6 +2654,8 @@ def sofonias(capitulo):
 @app.route('/api/biblia/capitulos/44', methods=['GET'])
 def ageu_capitulos():
     data = []
+
+    inserir_lista(44,'Ageu',1, 2)
     for x in range(1, 3):
 
         data.append( { "capítulo" : x } ) 
@@ -2369,6 +2689,7 @@ def ageu(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(44,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2378,6 +2699,7 @@ def ageu(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(44,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2389,6 +2711,8 @@ def ageu(capitulo):
 @app.route('/api/biblia/capitulos/45', methods=['GET'])
 def zacarias_capitulos():
     data = []
+
+    inserir_lista(45,'Zacarias',1, 14)
     for x in range(1, 15):
 
         data.append( { "capítulo" : x } ) 
@@ -2422,6 +2746,7 @@ def zacarias(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(45,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2431,6 +2756,7 @@ def zacarias(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(45,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2442,6 +2768,8 @@ def zacarias(capitulo):
 @app.route('/api/biblia/capitulos/46', methods=['GET'])
 def malaquias_capitulos():
     data = []
+
+    inserir_lista(46,'Malaquias',1, 3)
     for x in range(1, 4):
 
         data.append( { "capítulo" : x } ) 
@@ -2475,6 +2803,7 @@ def malaquias(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(46,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2484,6 +2813,7 @@ def malaquias(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(46,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2497,6 +2827,8 @@ def malaquias(capitulo):
 @app.route('/api/biblia/capitulos/47', methods=['GET'])
 def mateus_capitulos():
     data = []
+
+    inserir_lista(47,'São Mateus',2, 28)
     for x in range(1, 29):
 
         data.append( { "capítulo" : x } ) 
@@ -2530,6 +2862,7 @@ def mateus(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(47,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2539,22 +2872,11 @@ def mateus(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(47,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
     return jsonify({ "Testamento" : 2, "Livro" : 'São Mateus', "Capítulo" : capitulo , "Versículos" : data} )   
-
-###################################################################################
-
-# 48.Lista de Capitulos de São Mateus
-@app.route('/api/biblia/capitulos/48', methods=['GET'])
-def sao_marcos_capitulos():
-    data = []
-    for x in range(1, 17):
-
-        data.append( { "capítulo" : x } ) 
-     
-    return jsonify({ "Testamento" : 2, "Livro" : 'São Mateus', "Capítulos" : data} ) 
 
 ###################################################################################
 
@@ -2583,6 +2905,7 @@ def sao_marcos(capitulo):
            return jsonify({ "Testamento" : 2, "Livro" : 'São Marcos', "Capítulo" : capitulo , "Versículos" : [] } )  
 
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(48,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2592,6 +2915,7 @@ def sao_marcos(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(48,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2599,15 +2923,17 @@ def sao_marcos(capitulo):
 
 ###################################################################################
 
-# 49.Lista de Capitulos de São Lucas
-@app.route('/api/biblia/capitulos/49', methods=['GET'])
-def sao_lucas_capitulos():
+# 48.Lista de Capitulos de São Marcos
+@app.route('/api/biblia/capitulos/48', methods=['GET'])
+def sao_marcos_capitulos():
     data = []
-    for x in range(1, 25):
+
+    inserir_lista(48,'São Marcos',2, 16)
+    for x in range(1, 17):
 
         data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "Testamento" : 2, "Livro" : 'São Lucas', "Capítulos" : data} ) 
+    return jsonify({ "Testamento" : 2, "Livro" : 'São Marcos', "Capítulos" : data} ) 
 
 ###################################################################################
 
@@ -2636,6 +2962,7 @@ def sao_lucas(capitulo):
            return jsonify({ "Testamento" : 2, "Livro" : 'São Lucas', "Capítulo" : capitulo , "Versículos" : [] } )  
 
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(49,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2645,6 +2972,7 @@ def sao_lucas(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(49,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2652,10 +2980,26 @@ def sao_lucas(capitulo):
 
 ###################################################################################
 
+# 49.Lista de Capitulos de São Lucas
+@app.route('/api/biblia/capitulos/49', methods=['GET'])
+def sao_lucas_capitulos():
+    data = []
+
+    inserir_lista(49,'São Lucas',2, 24)
+    for x in range(1, 25):
+
+        data.append( { "capítulo" : x } ) 
+     
+    return jsonify({ "Testamento" : 2, "Livro" : 'São Lucas', "Capítulos" : data} ) 
+
+###################################################################################    
+
 # 50.Lista de Capitulos de São João
 @app.route('/api/biblia/capitulos/50', methods=['GET'])
 def sao_joao_capitulos():
     data = []
+
+    inserir_lista(50,'São João',2, 21)
     for x in range(1, 22):
 
         data.append( { "capítulo" : x } ) 
@@ -2689,6 +3033,7 @@ def sao_joao(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(50,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2698,6 +3043,7 @@ def sao_joao(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(50,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2709,6 +3055,8 @@ def sao_joao(capitulo):
 @app.route('/api/biblia/capitulos/51', methods=['GET'])
 def atos_dos_apostolos_capitulos():
     data = []
+
+    inserir_lista(51,'Atos dos Apóstolos',2, 28)
     for x in range(1, 29):
 
         data.append( { "capítulo" : x } ) 
@@ -2742,6 +3090,7 @@ def atos_dos_apostolos(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(51,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2751,6 +3100,7 @@ def atos_dos_apostolos(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(51,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2762,11 +3112,13 @@ def atos_dos_apostolos(capitulo):
 @app.route('/api/biblia/capitulos/52', methods=['GET'])
 def romanos_capitulos():
     data = []
+
+    inserir_lista(52,'Romanos',2, 16)
     for x in range(1, 17):
 
         data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "Testamento" : 2, "Livro" : 'Atos dos Apóstolos', "Capítulos" : data} ) 
+    return jsonify({ "Testamento" : 2, "Livro" : 'Romanos', "Capítulos" : data} ) 
 
 ###################################################################################
 
@@ -2795,6 +3147,7 @@ def romanos(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(52,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2804,6 +3157,7 @@ def romanos(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(52,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2816,6 +3170,8 @@ def romanos(capitulo):
 @app.route('/api/biblia/capitulos/53', methods=['GET'])
 def i_corintios_capitulos():
     data = []
+
+    inserir_lista(53,'I Coríntios',2, 16)
     for x in range(1, 17):
 
         data.append( { "capítulo" : x } ) 
@@ -2849,6 +3205,7 @@ def i_corintios(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(53,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2858,6 +3215,7 @@ def i_corintios(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(53,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2869,6 +3227,9 @@ def i_corintios(capitulo):
 @app.route('/api/biblia/capitulos/54', methods=['GET'])
 def ii_corintios_capitulos():
     data = []
+    
+    inserir_lista(54,'II Coríntios',2, 13)
+
     for x in range(1, 14):
 
         data.append( { "capítulo" : x } ) 
@@ -2877,7 +3238,7 @@ def ii_corintios_capitulos():
 
 ###################################################################################
 
-# 52. Livro dos Atos dos Romanos
+# 54. Livro dos Atos dos Romanos
 @app.route('/api/biblia/capitulos/54/versiculos/<capitulo>', methods=['GET'])
 def ii_corintios(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/ii-corintios{}".format(capitulo)
@@ -2902,6 +3263,7 @@ def ii_corintios(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(54,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2911,6 +3273,7 @@ def ii_corintios(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(54,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2923,6 +3286,8 @@ def ii_corintios(capitulo):
 @app.route('/api/biblia/capitulos/55', methods=['GET'])
 def galatas_capitulos():
     data = []
+
+    inserir_lista(55,'Gálatas',2, 6)
     for x in range(1, 7):
 
         data.append( { "capítulo" : x } ) 
@@ -2956,6 +3321,7 @@ def galatas(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(55,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -2965,6 +3331,7 @@ def galatas(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(55,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -2977,6 +3344,8 @@ def galatas(capitulo):
 @app.route('/api/biblia/capitulos/56', methods=['GET'])
 def efesios_capitulos():
     data = []
+
+    inserir_lista(52,'Efésios',2, 6)
     for x in range(1, 7):
 
         data.append( { "capítulo" : x } ) 
@@ -3010,6 +3379,7 @@ def efesios(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(56,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3019,6 +3389,7 @@ def efesios(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(56,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3031,6 +3402,8 @@ def efesios(capitulo):
 @app.route('/api/biblia/capitulos/57', methods=['GET'])
 def filipenses_capitulos():
     data = []
+
+    inserir_lista(57,'Filipenses',2, 4)
     for x in range(1, 5):
 
         data.append( { "capítulo" : x } ) 
@@ -3064,6 +3437,7 @@ def filipenses(capitulo):
            return jsonify({ "Testamento" : 2, "Livro" : 'Filipenses', "Capítulo" : capitulo , "Versículos" : [] } )  
 
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(57,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3073,6 +3447,7 @@ def filipenses(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(57,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3085,6 +3460,8 @@ def filipenses(capitulo):
 @app.route('/api/biblia/capitulos/58', methods=['GET'])
 def colosenses_capitulos():
     data = []
+
+    inserir_lista(52,'Colossenses',2, 4)
     for x in range(1, 5):
 
         data.append( { "capítulo" : x } ) 
@@ -3118,6 +3495,7 @@ def colosenses(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(58,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3127,6 +3505,7 @@ def colosenses(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(58,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3139,6 +3518,8 @@ def colosenses(capitulo):
 @app.route('/api/biblia/capitulos/59', methods=['GET'])
 def i_tessalonicenses_capitulos():
     data = []
+
+    inserir_lista(59,'I Tessalonicenses',2, 5)
     for x in range(1, 6):
 
         data.append( { "capítulo" : x } ) 
@@ -3172,6 +3553,7 @@ def i_tessalonicenses(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(59,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3181,6 +3563,7 @@ def i_tessalonicenses(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(59,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3193,6 +3576,8 @@ def i_tessalonicenses(capitulo):
 @app.route('/api/biblia/capitulos/60', methods=['GET'])
 def ii_tessalonicenses_capitulos():
     data = []
+
+    inserir_lista(60,'II Tessalonicenses',2, 16)
     for x in range(1, 4):
 
         data.append( { "capítulo" : x } ) 
@@ -3226,6 +3611,7 @@ def ii_tessalonicenses(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(60,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3235,6 +3621,7 @@ def ii_tessalonicenses(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(60,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3247,6 +3634,8 @@ def ii_tessalonicenses(capitulo):
 @app.route('/api/biblia/capitulos/61', methods=['GET'])
 def i_timoteo_capitulos():
     data = []
+
+    inserir_lista(62,'I Timóteo',2, 6)
     for x in range(1, 7):
 
         data.append( { "capítulo" : x } ) 
@@ -3280,6 +3669,7 @@ def i_timoteo(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(61,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3289,6 +3679,7 @@ def i_timoteo(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(61,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3301,6 +3692,8 @@ def i_timoteo(capitulo):
 @app.route('/api/biblia/capitulos/62', methods=['GET'])
 def ii_timoteo_capitulos():
     data = []
+
+    inserir_lista(62,'II Timóteo',2, 4)
     for x in range(1, 5):
 
         data.append( { "capítulo" : x } ) 
@@ -3334,6 +3727,7 @@ def ii_timoteo(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(62,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3343,6 +3737,7 @@ def ii_timoteo(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(62,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3355,6 +3750,8 @@ def ii_timoteo(capitulo):
 @app.route('/api/biblia/capitulos/63', methods=['GET'])
 def tito_capitulos():
     data = []
+
+    inserir_lista(63,'Tito',2, 3)
     for x in range(1, 4):
 
         data.append( { "capítulo" : x } ) 
@@ -3388,6 +3785,7 @@ def tito(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(63,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3397,6 +3795,7 @@ def tito(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(63,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3408,15 +3807,17 @@ def tito(capitulo):
 @app.route('/api/biblia/capitulos/64', methods=['GET'])
 def filemon_capitulos():
     data = []
+
+    inserir_lista(64,'Filemon',2, 1)
     for x in range(1, 2):
 
         data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "Testamento" : 2, "Livro" : 'Tito', "Capítulos" : data} ) 
+    return jsonify({ "Testamento" : 2, "Livro" : 'Filemon', "Capítulos" : data} ) 
 
 ###################################################################################
 
-# 64. Livro de Tito
+# 64. Livro de Filemon
 @app.route('/api/biblia/capitulos/64/versiculos/<capitulo>', methods=['GET'])
 def filemon(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/filemon/{}".format(capitulo)
@@ -3441,6 +3842,7 @@ def filemon(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(64,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3450,6 +3852,7 @@ def filemon(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(64,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3462,6 +3865,8 @@ def filemon(capitulo):
 @app.route('/api/biblia/capitulos/65', methods=['GET'])
 def hebreus_capitulos():
     data = []
+
+    inserir_lista(65,'Romanos',2, 13)
     for x in range(1, 14):
 
         data.append( { "capítulo" : x } ) 
@@ -3495,6 +3900,7 @@ def hebreus(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(65,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3504,6 +3910,7 @@ def hebreus(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(65,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3516,6 +3923,8 @@ def hebreus(capitulo):
 @app.route('/api/biblia/capitulos/66', methods=['GET'])
 def sao_tiago_capitulos():
     data = []
+
+    inserir_lista(66,'Tiago',2, 5)
     for x in range(1, 6):
 
         data.append( { "capítulo" : x } ) 
@@ -3524,7 +3933,7 @@ def sao_tiago_capitulos():
 
 ###################################################################################
 
-# 65. Livro de Hebreus
+# 66. Livro de Tiago
 @app.route('/api/biblia/capitulos/66/versiculos/<capitulo>', methods=['GET'])
 def sao_tiago(capitulo):
     URL = "https://www.bibliacatolica.com.br/biblia-ave-maria/sao-tiago/{}".format(capitulo)
@@ -3549,6 +3958,7 @@ def sao_tiago(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(66,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3558,6 +3968,7 @@ def sao_tiago(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(66,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3569,6 +3980,8 @@ def sao_tiago(capitulo):
 @app.route('/api/biblia/capitulos/67', methods=['GET'])
 def i_sao_pedro_capitulos():
     data = []
+    inserir_lista(67,'I São Pedro',2, 5)
+
     for x in range(1, 6):
 
         data.append( { "capítulo" : x } ) 
@@ -3602,6 +4015,7 @@ def i_sao_pedro(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(67,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3611,6 +4025,7 @@ def i_sao_pedro(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(67,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3622,6 +4037,8 @@ def i_sao_pedro(capitulo):
 @app.route('/api/biblia/capitulos/68', methods=['GET'])
 def ii_sao_pedro_capitulos():
     data = []
+
+    inserir_lista(68,'II São Pedro',2, 16)
     for x in range(1, 4):
 
         data.append( { "capítulo" : x } ) 
@@ -3655,6 +4072,7 @@ def ii_sao_pedro(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(68,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3664,6 +4082,7 @@ def ii_sao_pedro(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(68,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3676,11 +4095,13 @@ def ii_sao_pedro(capitulo):
 @app.route('/api/biblia/capitulos/69', methods=['GET'])
 def i_sao_joao_capitulos():
     data = []
+
+    inserir_lista(69,'I São João',2, 16)
     for x in range(1, 6):
 
         data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "Testamento" : 2, "Livro" : 'II São Pedro', "Capítulos" : data} ) 
+    return jsonify({ "Testamento" : 2, "Livro" : 'I São João', "Capítulos" : data} ) 
 
 ###################################################################################
 
@@ -3709,6 +4130,7 @@ def i_sao_joao(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(69,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3718,6 +4140,7 @@ def i_sao_joao(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(69,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3730,6 +4153,8 @@ def i_sao_joao(capitulo):
 @app.route('/api/biblia/capitulos/70', methods=['GET'])
 def ii_sao_joao_capitulos():
     data = []
+
+    inserir_lista(70,'II São João',2, 16)
     for x in range(1, 2):
 
         data.append( { "capítulo" : x } ) 
@@ -3763,6 +4188,7 @@ def ii_sao_joao(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(70,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3772,6 +4198,7 @@ def ii_sao_joao(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(70,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3781,14 +4208,16 @@ def ii_sao_joao(capitulo):
 ###################################################################################
 
 # 71.Lista de Livros do III São João
-@app.route('/api/biblia/capitulos/70', methods=['GET'])
+@app.route('/api/biblia/capitulos/71', methods=['GET'])
 def iii_sao_joao_capitulos():
     data = []
+
+    inserir_lista(71,'III São João',2, 16)
     for x in range(1, 2):
 
         data.append( { "capítulo" : x } ) 
      
-    return jsonify({ "Testamento" : 2, "Livro" : 'II São João', "Capítulos" : data} ) 
+    return jsonify({ "Testamento" : 2, "Livro" : 'III São João', "Capítulos" : data} ) 
 
 ###################################################################################
 
@@ -3817,6 +4246,7 @@ def iii_sao_joao(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(71,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3826,6 +4256,7 @@ def iii_sao_joao(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(71,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3839,6 +4270,8 @@ def iii_sao_joao(capitulo):
 @app.route('/api/biblia/capitulos/72', methods=['GET'])
 def sao_judas_capitulos():
     data = []
+
+    inserir_lista(72,'São Judas',2, 1)
     for x in range(1, 2):
 
         data.append( { "capítulo" : x } ) 
@@ -3872,6 +4305,7 @@ def ii_sao_judas(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(72,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3881,6 +4315,7 @@ def ii_sao_judas(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(72,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3893,6 +4328,8 @@ def ii_sao_judas(capitulo):
 @app.route('/api/biblia/capitulos/73', methods=['GET'])
 def apocalipse_capitulos():
     data = []
+
+    inserir_lista(73,'Apocalipse',2, 22)
     for x in range(1, 23):
 
         data.append( { "capítulo" : x } ) 
@@ -3926,6 +4363,7 @@ def apocalipse(capitulo):
 
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(73,capitulo,v,s)
 
     even = 1
     for dataBox in soup.find_all("p", class_="even"):
@@ -3935,6 +4373,7 @@ def apocalipse(capitulo):
         s = s.replace(verso,"")
         v = int(verso.replace(".",""))
         data.append( { "versiculo" : v, "texto" : s }  ) 
+        inserir_versiculo(73,capitulo,v,s)
         even = even + 1
 
     data = sorted(data, key=lambda k: k['versiculo'], reverse=False)
@@ -3948,4 +4387,4 @@ if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(os.environ.get('PORT', 5000))
     # Tem que ser 0.0.0.0 para rodar no Heroku
-    app.run(host='0.0.0.0', port=port)    
+    app.run(host='127.0.0.1', port=port)    
